@@ -262,7 +262,7 @@ export default function HomeCalculatorSteps() {
 
             <button
               onClick={() => {
-                const phone = "77477434343";
+                const phone = "77772282323";
                 const message = `Здравствуйте! Меня интересует строительство дома:\n
 Площадь: ${formData.area} м²\n
 Этажность: ${formData.floors}\n

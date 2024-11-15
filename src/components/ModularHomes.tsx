@@ -37,7 +37,7 @@ export default function ModularHomes() {
         <div className="text-center">
           <button
             onClick={() => {
-              const phone = "77477434343";
+              const phone = "77772282323";
               const message = "Здравствуйте! Я хотел бы узнать подробнее о модульных домах.";
               window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
             }}
