@@ -13,12 +13,22 @@ export default function ProjectDetails() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const handleOrderClick = () => {
+    const phone = "77772282323";
+    const message = `Здравствуйте! Меня интересует проект ${project?.title}`;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
   const handleNext = () => {
-    setSelectedImage((prev) => (prev + 1) % project!.gallery.length);
+    if (project) {
+      setSelectedImage((prev) => (prev + 1) % project.gallery.length);
+    }
   };
 
   const handlePrev = () => {
-    setSelectedImage((prev) => (prev - 1 + project!.gallery.length) % project!.gallery.length);
+    if (project) {
+      setSelectedImage((prev) => (prev - 1 + project.gallery.length) % project.gallery.length);
+    }
   };
 
   if (!project) {
@@ -145,11 +155,7 @@ export default function ProjectDetails() {
             </div>
 
             <button 
-              onClick={() => {
-                const phone = "77477434343";
-                const message = `Здравствуйте! Меня интересует проект ${project.title}`;
-                window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
-              }}
+              onClick={handleOrderClick}
               className="w-full bg-primary-600 text-white py-4 rounded-xl hover:bg-primary-700 transition-colors shadow-lg shadow-primary-600/30"
             >
               Заказать проект

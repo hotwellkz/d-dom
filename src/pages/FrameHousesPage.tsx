@@ -84,7 +84,7 @@ export default function FrameHousesPage() {
             </Link>
             <button
               onClick={() => {
-                const phone = "77477434343";
+                const phone = "77772282323";
                 const message = "Здравствуйте! Интересует строительство каркасного дома. Можно получить консультацию?";
                 window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
               }}

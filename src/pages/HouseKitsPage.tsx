@@ -140,7 +140,7 @@ export default function HouseKitsPage() {
                 <button 
                   className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-2"
                   onClick={() => {
-                    const phone = "77477434343";
+                    const phone = "77772282323";
                     const message = "Здравствуйте, я хотел бы получить консультацию по домокомплектам.";
                     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
                   }}

@@ -110,7 +110,7 @@ export default function SelfBuildHousePage() {
             </Link>
             <button
               onClick={() => {
-                const phone = "77477434343";
+                const phone = "77772282323";
                 const message = "Здравствуйте! Хочу узнать подробнее о стоимости строительства дома.";
                 window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
               }}

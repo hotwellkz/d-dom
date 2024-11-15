@@ -33,10 +33,9 @@ export default function ModularHeroSlider() {
   const touchEndX = useRef(0);
 
   const handleWhatsAppClick = () => {
-    const phone = "77477434343";
+    const phone = "77772282323";
     const message = "Здравствуйте, я хотел бы узнать подробнее о модульных домах.";
-    const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handleTouchStart = (e: TouchEvent) => {

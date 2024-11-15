@@ -11,12 +11,20 @@ export default function HouseKitDetails() {
   
   const kit = houseKits.find(k => k.id === Number(id));
 
-  const images = [
-    kit?.image || '',
-    'https://hotwell.kz/wp-content/uploads/2022/09/0707.jpeg.webp',
-    'https://hotwell.kz/wp-content/uploads/2021/01/Sertifikat-sip-01.jpg'
-  ];
-  
+  const handleOrderClick = () => {
+    const phone = "77772282323";
+    const message = `Здравствуйте! Меня интересует домокомплект ${kit?.title}`;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
+  const handleNext = () => {
+    setSelectedImage((prev) => (prev + 1) % (kit?.gallery?.length || 1));
+  };
+
+  const handlePrev = () => {
+    setSelectedImage((prev) => (prev - 1 + (kit?.gallery?.length || 1)) % (kit?.gallery?.length || 1));
+  };
+
   if (!kit) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -29,35 +37,6 @@ export default function HouseKitDetails() {
       </div>
     );
   }
-
-  const handleNext = () => {
-    setSelectedImage((prev) => (prev + 1) % images.length);
-  };
-
-  const handlePrev = () => {
-    setSelectedImage((prev) => (prev - 1 + images.length) % images.length);
-  };
-
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isModalOpen) return;
-
-      switch (e.key) {
-        case 'ArrowRight':
-          handleNext();
-          break;
-        case 'ArrowLeft':
-          handlePrev();
-          break;
-        case 'Escape':
-          setIsModalOpen(false);
-          break;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isModalOpen]);
 
   return (
     <div className="min-h-screen pt-20">
@@ -74,7 +53,7 @@ export default function HouseKitDetails() {
               onClick={() => setIsModalOpen(true)}
             >
               <img
-                src={images[selectedImage]}
+                src={kit.gallery[selectedImage]}
                 alt={kit.title}
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
@@ -83,7 +62,7 @@ export default function HouseKitDetails() {
               </div>
             </div>
             <div className="grid grid-cols-3 gap-4">
-              {images.map((image, index) => (
+              {kit.gallery.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
@@ -137,7 +116,10 @@ export default function HouseKitDetails() {
               </div>
             </div>
 
-            <button className="w-full bg-primary-600 text-white py-4 rounded-xl hover:bg-primary-700 transition-colors shadow-lg shadow-primary-600/30">
+            <button 
+              onClick={handleOrderClick}
+              className="w-full bg-primary-600 text-white py-4 rounded-xl hover:bg-primary-700 transition-colors shadow-lg shadow-primary-600/30"
+            >
               Заказать домокомплект
             </button>
           </div>
@@ -146,7 +128,7 @@ export default function HouseKitDetails() {
 
       <ImageModal 
         isOpen={isModalOpen}
-        images={images}
+        images={kit.gallery}
         currentIndex={selectedImage}
         onClose={() => setIsModalOpen(false)}
         onNext={handleNext}

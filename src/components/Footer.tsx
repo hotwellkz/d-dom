@@ -4,10 +4,9 @@ import { Link } from 'react-router-dom';
 
 export default function Footer() {
   const handleWhatsAppClick = () => {
-    const phone = "77477434343";
+    const phone = "77772282323";
     const message = "Здравствуйте, я хотел бы получить консультацию.";
-    const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   return (
@@ -60,10 +59,10 @@ export default function Footer() {
               <li className="flex items-center justify-center md:justify-start text-secondary-200">
                 <Phone className="h-5 w-5 mr-2" />
                 <a 
-                  href="tel:+77477434343"
+                  href="tel:+77772282323"
                   className="hover:text-white transition-colors"
                 >
-                  +7 (747) 743-43-43
+                  +7 (777) 228-23-23
                 </a>
               </li>
               <li className="flex items-center justify-center md:justify-start text-secondary-200">
