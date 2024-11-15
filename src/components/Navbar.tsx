@@ -9,7 +9,7 @@ interface NavbarProps {
 
 export default function Navbar({ isOpen, setIsOpen }: NavbarProps) {
   const handleWhatsAppClick = () => {
-    const phone = "77477434343";
+    const phone = "77772282323";
     const message = "Здравствуйте! Я хотел бы получить консультацию.";
     const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -30,11 +30,10 @@ export default function Navbar({ isOpen, setIsOpen }: NavbarProps) {
           {/* Mobile Menu Button and Phone (visible only on mobile) */}
           <div className="flex items-center md:hidden">
             <a 
-              href="tel:+77477434343"
+              href="tel:+77772282323"
               className="mr-4 flex items-center text-primary-600"
             >
-              <Phone className="h-5 w-5 mr-1" />
-              <span className="font-medium"></span>
+              <Phone className="h-5 w-5" />
             </a>
             <button 
               onClick={() => setIsOpen(!isOpen)} 
@@ -87,11 +86,11 @@ export default function Navbar({ isOpen, setIsOpen }: NavbarProps) {
               О нас
             </Link>
             <a 
-              href="tel:+77477434343"
+              href="tel:+77772282323"
               className="flex items-center text-secondary-600 hover:text-primary-600 transition-colors"
             >
               <Phone className="h-5 w-5 mr-1" />
-              +7 (747) 743-43-43
+              +7 (777) 228-23-23
             </a>
             <button 
               onClick={handleWhatsAppClick}
