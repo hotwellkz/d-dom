@@ -58,7 +58,7 @@ export default function Contact() {
               <Phone className="h-6 w-6 text-primary-600 mt-1" />
               <div className="ml-4">
                 <h3 className="text-lg font-medium text-secondary-800">Телефон</h3>
-                <p className="mt-1 text-secondary-600">+7 (747) 743-43-43</p>
+                <p className="mt-1 text-secondary-600">+7 (777) 228-23-23</p>
               </div>
             </div>
             <div className="flex items-start">
