@@ -402,7 +402,7 @@ ${formData.floors === '2 этажа' ? `Высота 2-го этажа: ${formDa
           <div className="mb-6 sm:mb-8">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-                Калькулятор стоимости
+                Кальку  лятор стоимости
               </h2>
               <span className="text-sm text-gray-600">
                 Шаг {currentStep + 1} из 6
