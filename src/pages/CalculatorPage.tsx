@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SEO from '../components/SEO';
 import { Calculator, Building2, Package, Wrench } from 'lucide-react';
+import HomeCalculatorSteps from '../components/HomeCalculatorSteps';
 
 interface CalculatorState {
   area: string;
@@ -155,13 +156,26 @@ ${formData.floors === '2 этажа' ? `Высота 2-го этажа: ${formDa
 
   return (
     <div className="min-h-screen pt-20">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <SEO 
           title="Калькулятор стоимости строительства дома из СИП панелей"
           description="Рассчитайте стоимость строительства дома из СИП панелей онлайн. ✓ Точный расчет ✓ Учет всех параметров ✓ Мгновенный результат"
           keywords="калькулятор строительства, расчет стоимости дома, СИП панели калькулятор, цена дома из СИП панелей"
-          h1="Калькулятор Строительства"
         />
+
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900">
+            Калькулятор стоимости строительства
+          </h1>
+        </div>
+
+        <HomeCalculatorSteps />
+
+        <div className="text-center my-20">
+          <h2 className="text-3xl font-bold text-gray-900">
+            Более подробный калькулятор
+          </h2>
+        </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="flex items-center gap-4 mb-8">
