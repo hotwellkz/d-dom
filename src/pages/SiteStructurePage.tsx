@@ -3,7 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, FileText } from 'lucide-react';
 import SEO from '../components/SEO';
 
-// This component will automatically get all routes from the Router
 const routes = [
   { path: '/', name: 'Главная' },
   { path: '/projects', name: 'Проекты' },
@@ -14,6 +13,11 @@ const routes = [
   { path: '/calculator', name: 'Калькулятор' },
   { path: '/news', name: 'Новости' },
   { path: '/about', name: 'О нас' },
+  { path: '/karkasnye-doma', name: 'Каркасные дома' },
+  { path: '/stoimost-stroitelstva-doma', name: 'Стоимость строительства' },
+  { path: '/postroit-dom-almaty', name: 'Построить дом в Алматы' },
+  { path: '/kak-postroit-derevyannyj-dom', name: 'Как построить деревянный дом' },
+  { path: '/skolko-stoit-postroit-dom-samomu', name: 'Сколько стоит построить дом самому' },
   { path: '/site-structure', name: 'Структура сайта' }
 ];
 
