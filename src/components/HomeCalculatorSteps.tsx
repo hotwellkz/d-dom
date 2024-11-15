@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Calculator, Building2, Package, Wrench } from 'lucide-react';
 
 interface CalculatorState {
@@ -10,6 +9,74 @@ interface CalculatorState {
   roofType: string;
   houseShape: string;
 }
+
+const getBasePricePerSqm = (area: number): number => {
+  if (area >= 10 && area <= 24) return 131772;
+  if (area >= 25 && area <= 49) return 109586;
+  if (area >= 50 && area <= 74) return 89981;
+  if (area >= 75 && area <= 99) return 86163;
+  if (area >= 100 && area <= 149) return 75352;
+  if (area >= 150 && area <= 199) return 65361;
+  if (area >= 200 && area <= 249) return 61000;
+  if (area >= 250 && area <= 299) return 56641;
+  if (area >= 300 && area <= 349) return 56091;
+  if (area >= 350 && area <= 399) return 54991;
+  if (area >= 400 && area <= 499) return 53891;
+  if (area >= 500 && area <= 1500) return 52791;
+  return 0;
+};
+
+const calculatePrice = (formData: CalculatorState): number => {
+  const area = parseFloat(formData.area) || 0;
+  if (area < 10 || area > 1500) return 0;
+
+  let pricePerSqm = getBasePricePerSqm(area);
+
+  // Add floor price
+  if (formData.floors === '1 этаж') {
+    pricePerSqm += 7295;
+  } else if (formData.floors === '2 этажа') {
+    pricePerSqm += 1619;
+  }
+
+  // Add first floor height price
+  if (formData.firstFloorHeight === '2,8 метра') {
+    pricePerSqm += 3798;
+  } else if (formData.firstFloorHeight === '3 метра') {
+    pricePerSqm += 5290;
+  }
+
+  // Add second floor height price for 2-story buildings
+  if (formData.floors === '2 этажа') {
+    if (formData.secondFloorHeight === '2,8 метра') {
+      pricePerSqm += 3798;
+    } else if (formData.secondFloorHeight === '3 метра') {
+      pricePerSqm += 5290;
+    }
+  }
+
+  // Add roof price
+  if (formData.roofType === '2-скатная') {
+    pricePerSqm += 1616;
+  } else if (formData.roofType === '4-скатная') {
+    pricePerSqm += formData.floors === '1 этаж' ? 7085 : 4723;
+  }
+
+  // Add house shape price
+  if (formData.houseShape === 'Сложная форма') {
+    pricePerSqm += 4676;
+  }
+
+  return pricePerSqm * area;
+};
+
+const calculateCostBreakdown = (totalPrice: number) => {
+  return {
+    foundation: Math.round(totalPrice * 0.14),
+    houseKit: Math.round(totalPrice * 0.71),
+    assembly: Math.round(totalPrice * 0.15)
+  };
+};
 
 export default function HomeCalculatorSteps() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -215,18 +282,51 @@ export default function HomeCalculatorSteps() {
         );
 
       case 5:
-        const calculatePrice = () => {
-          // Add your price calculation logic here
-          return 8238500;
-        };
-
-        const totalPrice = calculatePrice();
-        const foundation = Math.round(totalPrice * 0.14);
-        const houseKit = Math.round(totalPrice * 0.71);
-        const assembly = Math.round(totalPrice * 0.15);
+        const totalPrice = calculatePrice(formData);
+        const area = parseFloat(formData.area) || 0;
+        const pricePerSqm = area > 0 ? totalPrice / area : 0;
+        const { foundation, houseKit, assembly } = calculateCostBreakdown(totalPrice);
 
         return (
           <div className="space-y-6">
+            {/* Selected Parameters Summary */}
+            <div className="bg-gray-50 rounded-xl p-4 space-y-2">
+              <h4 className="font-semibold text-gray-900 mb-3">Выбранные параметры:</h4>
+              <div className="grid gap-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Площадь:</span>
+                  <span className="font-medium">{formData.area} м²</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Этажность:</span>
+                  <span className="font-medium">{formData.floors}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Высота 1-го этажа:</span>
+                  <span className="font-medium">{formData.firstFloorHeight}</span>
+                </div>
+                {formData.floors === '2 этажа' && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Высота 2-го этажа:</span>
+                    <span className="font-medium">{formData.secondFloorHeight}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Тип крыши:</span>
+                  <span className="font-medium">{formData.roofType}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Форма дома:</span>
+                  <span className="font-medium">{formData.houseShape}</span>
+                </div>
+                <div className="flex justify-between pt-2 border-t border-gray-200">
+                  <span className="text-gray-900 font-medium">Стоимость за м²:</span>
+                  <span className="font-bold text-primary-600">{pricePerSqm.toLocaleString()} тг/м²</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Cost Breakdown */}
             <div className="grid gap-4">
               <div className="flex items-center justify-between text-gray-600">
                 <div className="flex items-center gap-2">
@@ -270,6 +370,7 @@ export default function HomeCalculatorSteps() {
 ${formData.floors === '2 этажа' ? `Высота 2-го этажа: ${formData.secondFloorHeight}\n` : ''}
 Тип крыши: ${formData.roofType}\n
 Форма дома: ${formData.houseShape}\n
+Стоимость за м²: ${pricePerSqm.toLocaleString()} тг/м²\n
 Общая стоимость: ${totalPrice.toLocaleString()} тг`;
                 window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
               }}
