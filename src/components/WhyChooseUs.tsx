@@ -77,7 +77,7 @@ export default function WhyChooseUs() {
               </p>
               <button 
                 onClick={() => {
-                  const phone = "77477434343";
+                  const phone = "77772282323";
                   const message = "Здравствуйте! Я хотел бы получить консультацию по строительству дома.";
                   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
                 }}

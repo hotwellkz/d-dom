@@ -8,7 +8,7 @@ interface MobileNavProps {
 
 export default function MobileNav({ onMenuClick }: MobileNavProps) {
   const handleWhatsAppClick = () => {
-    const phone = "77477434343";
+    const phone = "77772282323";
     const message = "Здравствуйте, я хотел бы получить консультацию.";
     const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -34,7 +34,7 @@ export default function MobileNav({ onMenuClick }: MobileNavProps) {
         </button>
         
         <a
-          href="tel:+77477434343"
+          href="tel:+77772282323"
           className="flex flex-col items-center justify-center p-3 text-primary-600 hover:text-primary-700"
         >
           <Phone className="h-6 w-6" />

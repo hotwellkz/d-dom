@@ -110,7 +110,7 @@ export default function Testimonials() {
               </p>
               <button 
                 onClick={() => {
-                  const phone = "77477434343";
+                  const phone = "77772282323";
                   const message = "Здравствуйте! Я хотел бы оставить отзыв о вашей компании.";
                   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
                 }}
