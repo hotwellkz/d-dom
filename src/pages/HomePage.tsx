@@ -17,8 +17,10 @@ import SiteTour from '../components/SiteTour';
 import HomeCalculator from '../components/HomeCalculator';
 import HomeCalculatorSteps from '../components/HomeCalculatorSteps';
 import ModularHomesPreview from '../components/ModularHomesPreview';
+import ProjectsMap from '../components/ProjectsMap';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { projects } from '../data/projects';
 
 export default function HomePage() {
   return (
@@ -33,9 +35,10 @@ export default function HomePage() {
       <Projects />
       <HomeCalculatorSteps />
       <OurWorks />
-      <ModularHomesPreview />
+      <ProjectsMap projects={projects} />
       <Services />
       <SipPanels />
+      <ModularHomesPreview />
       <HouseKits />
       <SipAdvantages />
       <SiteTour />

@@ -13,24 +13,6 @@ export default function ProjectDetails() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleOrderClick = () => {
-    const phone = "77772282323";
-    const message = `Здравствуйте! Меня интересует проект ${project?.title}`;
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
-  };
-
-  const handleNext = () => {
-    if (project) {
-      setSelectedImage((prev) => (prev + 1) % project.gallery.length);
-    }
-  };
-
-  const handlePrev = () => {
-    if (project) {
-      setSelectedImage((prev) => (prev - 1 + project.gallery.length) % project.gallery.length);
-    }
-  };
-
   if (!project) {
     return (
       <div className="min-h-screen pt-20 flex items-center justify-center">
@@ -43,6 +25,20 @@ export default function ProjectDetails() {
       </div>
     );
   }
+
+  const handleOrderClick = () => {
+    const phone = "77772282323";
+    const message = `Здравствуйте! Меня интересует проект ${project.title}`;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
+  const handleNext = () => {
+    setSelectedImage((prev) => (prev + 1) % project.gallery.length);
+  };
+
+  const handlePrev = () => {
+    setSelectedImage((prev) => (prev - 1 + project.gallery.length) % project.gallery.length);
+  };
 
   return (
     <div className="min-h-screen pt-20">
@@ -149,10 +145,17 @@ export default function ProjectDetails() {
               </div>
             </div>
 
-            <div className="flex items-center text-gray-700 mb-8">
+            <div className="flex items-center text-gray-700 mb-4">
               <MapPin className="h-6 w-6 text-primary-600 mr-2" />
               <span>Расположение: {project.location}</span>
             </div>
+
+            {project.coordinates && (
+              <div className="flex items-center text-gray-700 mb-8">
+                <MapPin className="h-6 w-6 text-primary-600 mr-2" />
+                <span>Координаты: {project.coordinates[0]}, {project.coordinates[1]}</span>
+              </div>
+            )}
 
             <button 
               onClick={handleOrderClick}
