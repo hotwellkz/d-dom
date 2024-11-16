@@ -14,6 +14,7 @@ import HouseKitsPage from './pages/HouseKitsPage';
 import HouseKitDetails from './pages/HouseKitDetails';
 import SipPanelsPage from './pages/SipPanelsPage';
 import SipPanelDetails from './pages/SipPanelDetails';
+import SipPanelsAlmatyPage from './pages/SipPanelsAlmatyPage';
 import AboutPage from './pages/AboutPage';
 import ModularHomesPage from './pages/ModularHomesPage';
 import ModularHomeDetails from './pages/ModularHomeDetails';
@@ -46,6 +47,7 @@ export default function App() {
             <Route path="/house-kit/:id" element={<HouseKitDetails />} />
             <Route path="/sip-panels" element={<SipPanelsPage />} />
             <Route path="/sip-panel/:id" element={<SipPanelDetails />} />
+            <Route path="/sip-panels-almaty" element={<SipPanelsAlmatyPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/modular-homes" element={<ModularHomesPage />} />
             <Route path="/modular-home/:id" element={<ModularHomeDetails />} />
