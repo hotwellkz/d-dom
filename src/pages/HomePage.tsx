@@ -1,5 +1,4 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import SEO from '../components/SEO';
 import Hero from '../components/Hero';
 import Services from '../components/Services';
@@ -36,6 +35,19 @@ export default function HomePage() {
       <Projects />
       <HomeCalculatorSteps />
       <OurWorks />
+      <ProjectsMap projects={projects} />
+      <Services />
+      <SipPanels />
+      <ModularHomesPreview />
+      <HouseKits />
+      <SipAdvantages />
+      <SiteTour />
+      <WhyChooseUs />
+      <Testimonials />
+      <About />
+      <HomeFaq />
+      <News />
+      <HomeCalculator />
 
       {/* Useful Links Section */}
       <section className="py-20 bg-neutral-50">
@@ -140,26 +152,6 @@ export default function HomePage() {
               </span>
             </Link>
           </div>
-        </div>
-      </section>
-
-      <Services />
-      <SipPanels />
-      <ModularHomesPreview />
-      <HouseKits />
-      <SipAdvantages />
-      <SiteTour />
-      <WhyChooseUs />
-      <Testimonials />
-      <About />
-      <HomeFaq />
-      <News />
-      <HomeCalculator />
-
-      {/* Projects Map Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ProjectsMap projects={projects.filter(p => p.coordinates)} />
         </div>
       </section>
 

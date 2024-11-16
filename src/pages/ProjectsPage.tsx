@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import SEO from '../components/SEO';
 import ProjectCard from '../components/ProjectCard';
 import ProjectFilters from '../components/ProjectFilters';
-import ProjectsMap from '../components/ProjectsMap';
 import { projects } from '../data/projects';
 import { ArrowRight } from 'lucide-react';
 
@@ -133,7 +132,7 @@ export default function ProjectsPage() {
           />
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredProjects.map((project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
@@ -147,27 +146,17 @@ export default function ProjectsPage() {
           </div>
         )}
 
-        {/* Projects Map */}
-        <div className="mb-16">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">
-            Наши реализованные проекты на карте
-          </h2>
-          <ProjectsMap projects={filteredProjects.filter(p => p.coordinates)} />
-        </div>
-
         {/* More Projects Button */}
-        <div className="text-center">
-          <button
-            onClick={() => {
-              const phone = "77772282323";
-              const message = "Здравствуйте! Я хотел бы узнать больше о проектах домов.";
-              window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
-            }}
+        <div className="text-center mt-12">
+          <a
+            href="https://hotwell.kz/product-category/proekty/"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center px-8 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors shadow-lg shadow-primary-600/30"
           >
-            Получить консультацию
+            Смотреть больше проектов
             <ArrowRight className="ml-2 h-5 w-5" />
-          </button>
+          </a>
         </div>
       </div>
     </div>
