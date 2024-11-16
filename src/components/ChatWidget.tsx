@@ -10,8 +10,8 @@ interface Message {
   timestamp: Date;
 }
 
-// В продакшене замените на URL вашего сервера на Render
-const SOCKET_URL = 'https://dostupnydom-chat.onrender.com';
+// В продакшене используем URL сервера на Render
+const SOCKET_URL = 'https://hotwell-chat.onrender.com';
 
 const RECONNECT_DELAY = 5000;
 const MAX_RETRIES = 3;
@@ -88,7 +88,6 @@ export default function ChatWidget() {
       });
     } catch (error) {
       setConnectionError('Ошибка при инициализации соединения');
-      setIsConnected(false);
     }
   };
 
@@ -128,8 +127,8 @@ export default function ChatWidget() {
     try {
       socketRef.current.emit('message', message);
     } catch (error) {
-      setIsLoading(false);
       setConnectionError('Ошибка отправки сообщения');
+      setIsLoading(false);
     }
   };
 
