@@ -9,6 +9,7 @@ const routes = [
   { path: '/modular-homes', name: 'Модульные дома' },
   { path: '/house-kits', name: 'Домокомплекты' },
   { path: '/sip-panels', name: 'СИП панели' },
+  { path: '/sip-panels-almaty', name: 'СИП панели Алматы' },
   { path: '/prices', name: 'Цены' },
   { path: '/calculator', name: 'Калькулятор' },
   { path: '/news', name: 'Новости' },
