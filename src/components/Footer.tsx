@@ -37,6 +37,7 @@ export default function Footer() {
                 Калькулятор
               </Link></li>
               <li><Link to="/about" className="text-secondary-200 hover:text-white transition-colors">О нас</Link></li>
+              <li><Link to="/careers" className="text-secondary-200 hover:text-white transition-colors">Вакансии</Link></li>
               <li><Link to="/site-structure" className="text-secondary-200 hover:text-white transition-colors">Структура сайта</Link></li>
             </ul>
           </div>

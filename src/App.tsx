@@ -23,6 +23,7 @@ import BuildHouseAlmatyPage from './pages/BuildHouseAlmatyPage';
 import WoodenHousePage from './pages/WoodenHousePage';
 import SelfBuildHousePage from './pages/SelfBuildHousePage';
 import FrameHousesPage from './pages/FrameHousesPage';
+import CareersPage from './pages/CareersPage';
 import Footer from './components/Footer';
 
 export default function App() {
@@ -55,6 +56,7 @@ export default function App() {
             <Route path="/kak-postroit-derevyannyj-dom" element={<WoodenHousePage />} />
             <Route path="/skolko-stoit-postroit-dom-samomu" element={<SelfBuildHousePage />} />
             <Route path="/karkasnye-doma" element={<FrameHousesPage />} />
+            <Route path="/careers" element={<CareersPage />} />
           </Routes>
         </main>
         <Footer />
