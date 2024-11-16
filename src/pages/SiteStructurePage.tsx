@@ -15,14 +15,15 @@ const routes = [
   { path: '/news', name: 'Новости' },
   { path: '/about', name: 'О нас' },
   { path: '/karkasnye-doma', name: 'Каркасные дома' },
-  { path: '/finskie-doma', name: 'Финские дома' },
-  { path: '/derevyannye-doma-almaty', name: 'Деревянные дома в Алматы' },
-  { path: '/doma-iz-brusa-almaty', name: 'Дома из бруса в Алматы' },
-  { path: '/proekty-domov-iz-sip-panelej-do-100m2', name: 'Проекты домов из СИП панелей до 100м2' },
+  { path: '/karkasnye-doma-cena', name: 'Каркасные дома цена' },
   { path: '/stoimost-stroitelstva-doma', name: 'Стоимость строительства' },
   { path: '/postroit-dom-almaty', name: 'Построить дом в Алматы' },
   { path: '/kak-postroit-derevyannyj-dom', name: 'Как построить деревянный дом' },
   { path: '/skolko-stoit-postroit-dom-samomu', name: 'Сколько стоит построить дом самому' },
+  { path: '/finskie-doma', name: 'Финские дома' },
+  { path: '/derevyannye-doma-almaty', name: 'Деревянные дома в Алматы' },
+  { path: '/doma-iz-brusa-almaty', name: 'Дома из бруса в Алматы' },
+  { path: '/proekty-domov-iz-sip-panelej-do-100m2', name: 'Проекты домов из СИП панелей до 100м2' },
   { path: '/site-structure', name: 'Структура сайта' }
 ];
 
