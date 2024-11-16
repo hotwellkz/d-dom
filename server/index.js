@@ -19,8 +19,8 @@ const io = new Server(httpServer, {
 });
 
 // Инициализация Telegram бота
-const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8175269064:AAEUBxMk1B3XrxU7OfgcSFOpBy44OzOyNA4';
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '-4500008974';
 
 if (!TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) {
   console.error('Необходимо указать TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID в .env файле');
@@ -52,7 +52,7 @@ io.on('connection', (socket) => {
       );
 
       // Сохраняем соответствие между ID чата на сайте и сообщением в Telegram
-      chatMapping.set(telegramMessage.message_id, socket.id);
+      chatMapping.set(socket.id, telegramMessage.message_id);
 
     } catch (error) {
       console.error('Ошибка отправки в Telegram:', error);
@@ -67,25 +67,24 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
+    // Удаляем соответствие при отключении клиента
+    chatMapping.delete(socket.id);
   });
 });
 
 // Обработка ответов из Telegram
 bot.on('message', async (msg) => {
-  // Проверяем, что это ответ на сообщение
-  if (msg.reply_to_message) {
-    const originalMessageId = msg.reply_to_message.message_id;
-    const socketId = chatMapping.get(originalMessageId);
-
-    if (socketId) {
-      // Отправляем ответ обратно в чат на сайте
-      io.to(socketId).emit('message', {
+  // Проверяем, что сообщение отправлено в нужную группу
+  if (msg.chat.id.toString() === TELEGRAM_CHAT_ID) {
+    // Находим активные соединения и отправляем сообщение всем подключенным клиентам
+    io.sockets.sockets.forEach((socket) => {
+      socket.emit('message', {
         id: Date.now().toString(),
         text: msg.text,
         sender: 'admin',
         timestamp: new Date()
       });
-    }
+    });
   }
 });
 
