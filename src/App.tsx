@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import MobileNav from './components/MobileNav';
 import ScrollToTop from './components/ScrollToTop';
+import ChatWidget from './components/ChatWidget';
+import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
 import ProjectsPage from './pages/ProjectsPage';
 import ProjectDetails from './pages/ProjectDetails';
@@ -24,7 +26,6 @@ import WoodenHousePage from './pages/WoodenHousePage';
 import SelfBuildHousePage from './pages/SelfBuildHousePage';
 import FrameHousesPage from './pages/FrameHousesPage';
 import CareersPage from './pages/CareersPage';
-import Footer from './components/Footer';
 
 export default function App() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -61,6 +62,7 @@ export default function App() {
         </main>
         <Footer />
         <MobileNav onMenuClick={() => setIsMenuOpen(!isMenuOpen)} />
+        <ChatWidget />
       </div>
     </BrowserRouter>
   );
