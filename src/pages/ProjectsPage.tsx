@@ -3,6 +3,7 @@ import SEO from '../components/SEO';
 import ProjectCard from '../components/ProjectCard';
 import ProjectFilters from '../components/ProjectFilters';
 import { projects } from '../data/projects';
+import { ArrowRight } from 'lucide-react';
 
 type SortOption = {
   label: string;
@@ -144,6 +145,19 @@ export default function ProjectsPage() {
             </p>
           </div>
         )}
+
+        {/* More Projects Button */}
+        <div className="text-center mt-12">
+          <a
+            href="https://hotwell.kz/product-category/proekty/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-8 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors shadow-lg shadow-primary-600/30"
+          >
+            Смотреть больше проектов
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </a>
+        </div>
       </div>
     </div>
   );
