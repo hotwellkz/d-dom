@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, TouchEvent } from 'react';
-import { ArrowRight, Calculator } from 'lucide-react';
+import { ArrowRight, Calculator, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const slides = [
@@ -16,8 +16,8 @@ const slides = [
     title: "Современные технологии строительства",
     description: "Используем инновационные материалы и передовые технологии для создания комфортного и энергоэффективного жилья.",
     image: "https://hotwell.kz/wp-content/uploads/2022/10/240.jpg",
-    buttonText: "Узнать больше",
-    buttonLink: "/about"
+    buttonText: "Проекты Домов",
+    buttonLink: "/projects"
   },
   {
     id: 3,
@@ -38,8 +38,7 @@ export default function Hero() {
   const handleWhatsAppClick = () => {
     const phone = "77772282323";
     const message = "Здравствуйте, я хотел бы получить консультацию.";
-    const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handleTouchStart = (e: TouchEvent) => {
@@ -139,6 +138,13 @@ export default function Hero() {
                         <Calculator className="h-5 w-5" />
                         Рассчитать стоимость
                       </Link>
+                      <button
+                        onClick={handleWhatsAppClick}
+                        className="bg-green-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors flex items-center gap-2 shadow-lg shadow-green-900/30"
+                      >
+                        <Phone className="h-5 w-5" />
+                        Напишите нам в WhatsApp
+                      </button>
                     </div>
                   </div>
                 </div>

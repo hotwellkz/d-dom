@@ -104,7 +104,7 @@ export default function HomeFaq() {
         <div className="text-center mt-12">
           <button
             onClick={() => {
-              const phone = "77477434343";
+              const phone = "77772282323";
               const message = "Здравствуйте! У меня есть вопрос о строительстве дома из СИП панелей.";
               window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
             }}

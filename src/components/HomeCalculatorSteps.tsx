@@ -130,93 +130,113 @@ export default function HomeCalculatorSteps() {
               Выберите количество этажей
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-              <button
-                onClick={() => {
-                  setFormData(prev => ({ ...prev, floors: '1 этаж' }));
-                  handleNext();
-                }}
-                className="aspect-square p-4 border-2 rounded-xl transition-colors hover:border-primary-600"
-              >
-                <img
-                  src="https://hotwell.kz/wp-content/uploads/2022/09/sip-doma.jpg"
-                  alt="1 этаж"
-                  className="w-full h-full object-cover rounded-lg mb-2"
-                />
-                <span className="text-lg font-medium">1 этаж</span>
-              </button>
-              <button
-                onClick={() => {
-                  setFormData(prev => ({ ...prev, floors: '2 этажа' }));
-                  handleNext();
-                }}
-                className="aspect-square p-4 border-2 rounded-xl transition-colors hover:border-primary-600"
-              >
-                <img
-                  src="https://hotwell.kz/wp-content/uploads/2022/09/B-157-1.jpg"
-                  alt="2 этажа"
-                  className="w-full h-full object-cover rounded-lg mb-2"
-                />
-                <span className="text-lg font-medium">2 этажа</span>
-              </button>
+              {['1 этаж', '2 этажа'].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => {
+                    setFormData(prev => ({ ...prev, floors: option }));
+                    handleNext();
+                  }}
+                  className="aspect-square p-4 border-2 rounded-xl transition-colors hover:border-primary-600"
+                >
+                  <img
+                    src={option === '1 этаж' 
+                      ? 'https://hotwell.kz/wp-content/uploads/2022/09/sip-doma.jpg'
+                      : 'https://hotwell.kz/wp-content/uploads/2022/09/B-157-1.jpg'
+                    }
+                    alt={option}
+                    className="w-full h-full object-cover rounded-lg mb-2"
+                  />
+                  <span className="text-lg font-medium">{option}</span>
+                </button>
+              ))}
             </div>
           </div>
         );
 
       case 2:
-        return (
-          <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
-              Выберите высоту {formData.floors === '2 этажа' ? 'первого этажа' : 'этажа'}
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-              {['2,5 метра', '2,8 метра', '3 метра'].map((height) => (
-                <button
-                  key={height}
-                  onClick={() => {
-                    setFormData(prev => ({ ...prev, firstFloorHeight: height }));
-                    handleNext();
-                  }}
-                  className="p-4 border-2 rounded-xl transition-colors hover:border-primary-600 sm:aspect-square flex sm:block items-center justify-between sm:justify-start"
-                >
-                  <img
-                    src="https://hotwell.kz/wp-content/uploads/2022/09/001-1.jpg.webp"
-                    alt={height}
-                    className="hidden sm:block w-full h-full object-cover rounded-lg mb-2"
-                  />
-                  <span className="text-lg font-medium">{height}</span>
-                </button>
-              ))}
+        if (formData.floors === '2 этажа') {
+          return (
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">
+                Выберите высоту этажей
+              </h3>
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-lg font-medium text-gray-700 mb-3">Высота первого этажа:</h4>
+                  <div className="grid grid-cols-3 gap-4">
+                    {['2,5 метра', '2,8 метра', '3 метра'].map((height) => (
+                      <button
+                        key={height}
+                        onClick={() => setFormData(prev => ({ ...prev, firstFloorHeight: height }))}
+                        className={`p-4 border-2 rounded-xl transition-colors hover:border-primary-600 ${
+                          formData.firstFloorHeight === height ? 'border-primary-600 bg-primary-50' : ''
+                        }`}
+                      >
+                        <span className="text-lg font-medium">{height}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-lg font-medium text-gray-700 mb-3">Высота второго этажа:</h4>
+                  <div className="grid grid-cols-3 gap-4">
+                    {['2,5 метра', '2,8 метра', '3 метра'].map((height) => (
+                      <button
+                        key={height}
+                        onClick={() => setFormData(prev => ({ ...prev, secondFloorHeight: height }))}
+                        className={`p-4 border-2 rounded-xl transition-colors hover:border-primary-600 ${
+                          formData.secondFloorHeight === height ? 'border-primary-600 bg-primary-50' : ''
+                        }`}
+                      >
+                        <span className="text-lg font-medium">{height}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={handleNext}
+                disabled={!formData.firstFloorHeight || !formData.secondFloorHeight}
+                className="w-full bg-primary-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-700 transition-colors mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Далее
+              </button>
             </div>
-          </div>
-        );
+          );
+        } else {
+          return (
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">
+                Выберите высоту этажа
+              </h3>
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                {['2,5 метра', '2,8 метра', '3 метра'].map((height) => (
+                  <button
+                    key={height}
+                    onClick={() => setFormData(prev => ({ ...prev, firstFloorHeight: height }))}
+                    className={`p-4 border-2 rounded-xl transition-colors hover:border-primary-600 ${
+                      formData.firstFloorHeight === height ? 'border-primary-600 bg-primary-50' : ''
+                    }`}
+                  >
+                    <span className="text-lg font-medium">{height}</span>
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={handleNext}
+                disabled={!formData.firstFloorHeight}
+                className="w-full bg-primary-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-700 transition-colors mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Далее
+              </button>
+            </div>
+          );
+        }
 
       case 3:
-        return formData.floors === '2 этажа' ? (
-          <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
-              Выберите высоту второго этажа
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-              {['2,5 метра', '2,8 метра', '3 метра'].map((height) => (
-                <button
-                  key={height}
-                  onClick={() => {
-                    setFormData(prev => ({ ...prev, secondFloorHeight: height }));
-                    handleNext();
-                  }}
-                  className="p-4 border-2 rounded-xl transition-colors hover:border-primary-600 sm:aspect-square flex sm:block items-center justify-between sm:justify-start"
-                >
-                  <img
-                    src="https://hotwell.kz/wp-content/uploads/2022/09/001-1.jpg.webp"
-                    alt={height}
-                    className="hidden sm:block w-full h-full object-cover rounded-lg mb-2"
-                  />
-                  <span className="text-lg font-medium">{height}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : (
+        return (
           <div>
             <h3 className="text-xl font-bold text-gray-900 mb-4">
               Выберите тип крыши
@@ -225,11 +245,10 @@ export default function HomeCalculatorSteps() {
               {['1-скатная', '2-скатная', '4-скатная'].map((type) => (
                 <button
                   key={type}
-                  onClick={() => {
-                    setFormData(prev => ({ ...prev, roofType: type }));
-                    handleNext();
-                  }}
-                  className="aspect-square p-4 border-2 rounded-xl transition-colors hover:border-primary-600"
+                  onClick={() => setFormData(prev => ({ ...prev, roofType: type }))}
+                  className={`aspect-square p-4 border-2 rounded-xl transition-colors hover:border-primary-600 ${
+                    formData.roofType === type ? 'border-primary-600' : ''
+                  }`}
                 >
                   <img
                     src={
@@ -246,6 +265,13 @@ export default function HomeCalculatorSteps() {
                 </button>
               ))}
             </div>
+            <button
+              onClick={handleNext}
+              disabled={!formData.roofType}
+              className="w-full bg-primary-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-700 transition-colors mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Далее
+            </button>
           </div>
         );
 
@@ -259,11 +285,10 @@ export default function HomeCalculatorSteps() {
               {['Простая форма', 'Сложная форма'].map((shape) => (
                 <button
                   key={shape}
-                  onClick={() => {
-                    setFormData(prev => ({ ...prev, houseShape: shape }));
-                    handleNext();
-                  }}
-                  className="aspect-square p-4 border-2 rounded-xl transition-colors hover:border-primary-600"
+                  onClick={() => setFormData(prev => ({ ...prev, houseShape: shape }))}
+                  className={`aspect-square p-4 border-2 rounded-xl transition-colors hover:border-primary-600 ${
+                    formData.houseShape === shape ? 'border-primary-600' : ''
+                  }`}
                 >
                   <img
                     src={
@@ -278,6 +303,13 @@ export default function HomeCalculatorSteps() {
                 </button>
               ))}
             </div>
+            <button
+              onClick={handleNext}
+              disabled={!formData.houseShape}
+              className="w-full bg-primary-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-700 transition-colors mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Далее
+            </button>
           </div>
         );
 
@@ -289,7 +321,6 @@ export default function HomeCalculatorSteps() {
 
         return (
           <div className="space-y-6">
-            {/* Selected Parameters Summary */}
             <div className="bg-gray-50 rounded-xl p-4 space-y-2">
               <h4 className="font-semibold text-gray-900 mb-3">Выбранные параметры:</h4>
               <div className="grid gap-2 text-sm">
@@ -326,7 +357,6 @@ export default function HomeCalculatorSteps() {
               </div>
             </div>
 
-            {/* Cost Breakdown */}
             <div className="grid gap-4">
               <div className="flex items-center justify-between text-gray-600">
                 <div className="flex items-center gap-2">
@@ -402,7 +432,7 @@ ${formData.floors === '2 этажа' ? `Высота 2-го этажа: ${formDa
           <div className="mb-6 sm:mb-8">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-                Кальку  лятор стоимости
+                Калькулятор стоимости
               </h2>
               <span className="text-sm text-gray-600">
                 Шаг {currentStep + 1} из 6
