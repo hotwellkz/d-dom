@@ -27,6 +27,10 @@ import WoodenHousePage from './pages/WoodenHousePage';
 import SelfBuildHousePage from './pages/SelfBuildHousePage';
 import FrameHousesPage from './pages/FrameHousesPage';
 import CareersPage from './pages/CareersPage';
+import FinnishHousesPage from './pages/FinnishHousesPage';
+import WoodenHousesAlmatyPage from './pages/WoodenHousesAlmatyPage';
+import LogHousesAlmatyPage from './pages/LogHousesAlmatyPage';
+import SmallSipHousesPage from './pages/SmallSipHousesPage';
 
 export default function App() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -60,6 +64,10 @@ export default function App() {
             <Route path="/skolko-stoit-postroit-dom-samomu" element={<SelfBuildHousePage />} />
             <Route path="/karkasnye-doma" element={<FrameHousesPage />} />
             <Route path="/careers" element={<CareersPage />} />
+            <Route path="/finskie-doma" element={<FinnishHousesPage />} />
+            <Route path="/derevyannye-doma-almaty" element={<WoodenHousesAlmatyPage />} />
+            <Route path="/doma-iz-brusa-almaty" element={<LogHousesAlmatyPage />} />
+            <Route path="/proekty-domov-iz-sip-panelej-do-100m2" element={<SmallSipHousesPage />} />
           </Routes>
         </main>
         <Footer />
