@@ -11,7 +11,7 @@ interface Message {
 }
 
 // В продакшене используем URL сервера на Render
-const SOCKET_URL = 'https://hotwell-chat.onrender.com';
+const SOCKET_URL = 'https://your-render-url.onrender.com';
 
 const RECONNECT_DELAY = 5000;
 const MAX_RETRIES = 3;
