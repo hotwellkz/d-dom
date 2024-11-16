@@ -6,8 +6,8 @@ services:
     startCommand: node index.js
     envVars:
       - key: TELEGRAM_BOT_TOKEN
-        sync: false
+        value: 8175269064:AAEUBxMk1B3XrxU7OfgcSFOpBy44OzOyNA4
       - key: TELEGRAM_CHAT_ID
-        sync: false
+        value: -4500008974
       - key: PORT
         value: 3001
