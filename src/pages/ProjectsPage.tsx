@@ -4,6 +4,7 @@ import ProjectCard from '../components/ProjectCard';
 import ProjectFilters from '../components/ProjectFilters';
 import ProjectsMap from '../components/ProjectsMap';
 import { projects } from '../data/projects';
+import { categories } from '../data/categories';
 import { ArrowRight, Building2, Calculator, Home } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -31,7 +32,7 @@ export default function ProjectsPage() {
   const filters = useMemo(() => ({
     floors: [...new Set(projects.map(p => p.floors))].sort(),
     bedrooms: [...new Set(projects.map(p => p.bedrooms))].sort(),
-    categories: [...new Set(projects.map(p => p.category))],
+    categories: categories.map(c => c.name),
     priceRange: [
       Math.min(...projects.map(p => parseInt(p.price.replace(/\D/g, '')))),
       Math.max(...projects.map(p => parseInt(p.price.replace(/\D/g, ''))))
@@ -115,9 +116,9 @@ export default function ProjectsPage() {
     <div className="min-h-screen pt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <SEO 
-          title="Проекты домов из СИП панелей - Готовые решения"
-          description="Каталог готовых проектов домов из СИП панелей от компании Хотвелл. ✓ Современные проекты ✓ Доступные цены ✓ Быстрое строительство ✓ Индивидуальный подход"
-          keywords="проекты домов, СИП дома, готовые проекты, строительство дома, проекты домов Казахстан, цены на дома"
+          title="Проекты домов - Готовые решения"
+          description="Каталог готовых проектов домов от компании Хотвелл. ✓ Современные проекты ✓ Доступные цены ✓ Быстрое строительство ✓ Индивидуальный подход"
+          keywords="проекты домов, готовые проекты, строительство дома, проекты домов Казахстан, цены на дома"
           ogImage={projects[0]?.image}
           h1="Проекты Домов"
         />
@@ -146,6 +147,31 @@ export default function ProjectsPage() {
               Получить консультацию
             </button>
           </div>
+        </div>
+
+        {/* Categories Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => handleFilterChange('category', category.name)}
+              className={`relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 aspect-[4/3] group ${
+                selectedFilters.category === category.name ? 'ring-4 ring-primary-600' : ''
+              }`}
+            >
+              <img
+                src={category.image}
+                alt={category.name}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-6">
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-2">{category.name}</h3>
+                  <p className="text-white/80 text-sm">{category.description}</p>
+                </div>
+              </div>
+            </button>
+          ))}
         </div>
 
         <div className="mb-8">
@@ -185,42 +211,6 @@ export default function ProjectsPage() {
             </button>
           </div>
         )}
-
-        {/* Custom Project CTA */}
-        <div className="bg-primary-50 rounded-xl p-8 mb-16">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Не нашли подходящий проект?
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Мы можем разработать индивидуальный проект дома по вашим пожеланиям или адаптировать любой готовый проект под ваши требования.
-              </p>
-              <button
-                onClick={() => {
-                  const phone = "77772282323";
-                  const message = "Здравствуйте! Я хотел бы узнать больше об индивидуальном проектировании дома.";
-                  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
-                }}
-                className="inline-flex items-center px-8 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors shadow-lg shadow-primary-600/30"
-              >
-                Заказать индивидуальный проект
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </button>
-            </div>
-            <div className="relative">
-              <img
-                src="https://hotwell.kz/wp-content/uploads/2022/09/205.jpg"
-                alt="Индивидуальное проектирование"
-                className="rounded-lg shadow-lg"
-              />
-              <div className="absolute -bottom-6 -right-6 bg-white p-4 rounded-lg shadow-lg">
-                <p className="text-2xl font-bold text-primary-600">500+</p>
-                <p className="text-sm text-gray-600">построенных домов</p>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Projects Map */}
         <div className="mb-16">
