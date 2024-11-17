@@ -149,31 +149,6 @@ export default function ProjectsPage() {
           </div>
         </div>
 
-        {/* Categories Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => handleFilterChange('category', category.name)}
-              className={`relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 aspect-[4/3] group ${
-                selectedFilters.category === category.name ? 'ring-4 ring-primary-600' : ''
-              }`}
-            >
-              <img
-                src={category.image}
-                alt={category.name}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-6">
-                <div>
-                  <h3 className="text-xl font-bold text-white mb-2">{category.name}</h3>
-                  <p className="text-white/80 text-sm">{category.description}</p>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-
         <div className="mb-8">
           <ProjectFilters
             filters={filters}
