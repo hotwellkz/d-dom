@@ -27,24 +27,16 @@ export default function ChatWidget() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
   const [hasShownInitial, setHasShownInitial] = useState(false);
+  const welcomeMessageSent = useRef(false);
 
   useEffect(() => {
-    // Показываем чат через 30 секунд
+    // Показываем чат через 60 секунд (1 минута)
     const timer = setTimeout(() => {
       if (!hasShownInitial) {
         setIsOpen(true);
         setHasShownInitial(true);
-        // Добавляем приветственное сообщение
-        setMessages([
-          {
-            id: '1',
-            text: 'Здравствуйте! Как мы можем вам помочь?',
-            sender: 'admin',
-            timestamp: new Date()
-          }
-        ]);
       }
-    }, 30000);
+    }, 60000);
 
     return () => clearTimeout(timer);
   }, [hasShownInitial]);
@@ -64,6 +56,17 @@ export default function ChatWidget() {
         setIsConnected(true);
         setConnectionError(null);
         setRetryCount(0);
+
+        // Отправляем приветственное сообщение только один раз при первом подключении
+        if (!welcomeMessageSent.current) {
+          setMessages([{
+            id: '1',
+            text: 'Здравствуйте! Как мы можем вам помочь?',
+            sender: 'admin',
+            timestamp: new Date()
+          }]);
+          welcomeMessageSent.current = true;
+        }
       });
 
       socketRef.current.on('disconnect', () => {
