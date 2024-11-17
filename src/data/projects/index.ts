@@ -2,12 +2,14 @@ import { Project } from '../projectsSchema';
 import { sipProjects } from './sipProjects';
 import { ourWorks } from './ourWorks';
 import { projects2012 } from './projects2012';
+import { projects2022 } from './projects2022';
 
 // Объединяем все проекты
 export const projects: Project[] = [
   ...sipProjects,
   ...ourWorks,
-  ...projects2012
+  ...projects2012,
+  ...projects2022
 ];
 
 // Функции для фильтрации проектов
@@ -63,3 +65,4 @@ export function getProjectsWithCoordinates(): Project[] {
 export { sipProjects } from './sipProjects';
 export { ourWorks } from './ourWorks';
 export { projects2012 } from './projects2012';
+export { projects2022 } from './projects2022';

@@ -23,5 +23,11 @@ export interface Category {
       name: 'Объекты 2012г',
       description: 'Проекты, реализованные в 2012 году',
       image: 'https://hotwell.kz/wp-content/uploads/2022/10/240.jpg'
+    },
+    {
+      id: '2022',
+      name: 'Объекты 2022г',
+      description: 'Проекты, реализованные в 2022 году',
+      image: 'https://hotwell.kz/wp-content/uploads/2022/09/WhatsApp-Image-2022-07-13-at-21.57.38.jpeg'
     }
   ];
