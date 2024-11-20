@@ -11,7 +11,7 @@ interface SEOProps {
 }
 
 export default function SEO({ title, description, keywords, ogImage, h1, className = "text-4xl font-bold text-gray-900 mb-6" }: SEOProps) {
-  const siteName = 'Хотвелл';
+  const siteName = 'Доступный Дом';
   const fullTitle = `${title} | ${siteName}`;
 
   return (
