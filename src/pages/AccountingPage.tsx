@@ -1,245 +1,377 @@
-import React from 'react';
+import React, { useState } from 'react';
 import SEO from '../components/SEO';
-import { Link } from 'react-router-dom';
+import AccountingSidebar from '../components/AccountingSidebar';
+import AccountContextMenu from '../components/AccountContextMenu';
+import EditAccountModal from '../components/EditAccountModal';
 import { 
-  Calculator, 
-  FileText, 
-  CreditCard, 
-  DollarSign, 
-  FileCheck, 
+  User, 
+  Car, 
   Building2, 
-  ArrowRight,
-  Phone,
-  Mail,
-  MapPin
+  Calculator,
+  Home,
+  Hammer,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
-const services = [
+interface AccountItem {
+  id: number;
+  name: string;
+  amount: string;
+  icon: React.ReactNode;
+  color: 'blue' | 'yellow' | 'green';
+}
+
+interface AccountSection {
+  id: string;
+  title: string;
+  accounts: AccountItem[];
+}
+
+interface ContextMenu {
+  show: boolean;
+  x: number;
+  y: number;
+  accountId: number | null;
+  sectionId: string | null;
+}
+
+const accountSections: AccountSection[] = [
   {
-    icon: <Calculator className="h-12 w-12 text-primary-600" />,
-    title: 'Бухгалтерский учет',
-    description: 'Полное ведение бухгалтерского учета для строительных компаний'
+    id: 'personal',
+    title: 'Личные счета',
+    accounts: [
+      {
+        id: 1,
+        name: "Гульжемал",
+        amount: "3 609k ₸",
+        icon: <User className="h-8 w-8 text-white" />,
+        color: 'blue'
+      },
+      {
+        id: 2,
+        name: "Еркынгали",
+        amount: "75 000 ₸",
+        icon: <User className="h-8 w-8 text-white" />,
+        color: 'blue'
+      },
+      {
+        id: 3,
+        name: "Ольга",
+        amount: "4 275k ₸",
+        icon: <User className="h-8 w-8 text-white" />,
+        color: 'blue'
+      },
+      {
+        id: 4,
+        name: "Асхат/Куралай",
+        amount: "16 368k ₸",
+        icon: <User className="h-8 w-8 text-white" />,
+        color: 'blue'
+      }
+    ]
   },
   {
-    icon: <FileText className="h-12 w-12 text-primary-600" />,
-    title: 'Налоговая отчетность',
-    description: 'Подготовка и сдача налоговой отчетности в установленные сроки'
+    id: 'vehicles',
+    title: 'Транспорт и управление',
+    accounts: [
+      {
+        id: 5,
+        name: "Савицкий",
+        amount: "30 748.57 ₸",
+        icon: <Car className="h-8 w-8 text-white" />,
+        color: 'yellow'
+      },
+      {
+        id: 6,
+        name: "Саша",
+        amount: "- 195 486 ₸",
+        icon: <Car className="h-8 w-8 text-white" />,
+        color: 'yellow'
+      },
+      {
+        id: 7,
+        name: "Леонид",
+        amount: "2 729k ₸",
+        icon: <User className="h-8 w-8 text-white" />,
+        color: 'yellow'
+      },
+      {
+        id: 8,
+        name: "Милюк",
+        amount: "40 614k ₸",
+        icon: <Building2 className="h-8 w-8 text-white" />,
+        color: 'yellow'
+      }
+    ]
   },
   {
-    icon: <CreditCard className="h-12 w-12 text-primary-600" />,
-    title: 'Зарплата и кадры',
-    description: 'Расчет заработной платы и кадровое делопроизводство'
-  },
-  {
-    icon: <DollarSign className="h-12 w-12 text-primary-600" />,
-    title: 'Финансовый анализ',
-    description: 'Анализ финансовой деятельности и подготовка отчетов'
-  },
-  {
-    icon: <FileCheck className="h-12 w-12 text-primary-600" />,
-    title: 'Оптимизация налогов',
-    description: 'Законные способы оптимизации налогообложения'
-  },
-  {
-    icon: <Building2 className="h-12 w-12 text-primary-600" />,
-    title: 'Консультации',
-    description: 'Профессиональные консультации по бухгалтерским вопросам'
+    id: 'operations',
+    title: 'Операционные счета',
+    accounts: [
+      {
+        id: 9,
+        name: "Общ Расх",
+        amount: "38 910k ₸",
+        icon: <Calculator className="h-8 w-8 text-white" />,
+        color: 'green'
+      },
+      {
+        id: 10,
+        name: "Пеноп Клей OSB",
+        amount: "38 446k ₸",
+        icon: <Building2 className="h-8 w-8 text-white" />,
+        color: 'green'
+      },
+      {
+        id: 11,
+        name: "KK1",
+        amount: "1 512k ₸",
+        icon: <Home className="h-8 w-8 text-white" />,
+        color: 'green'
+      },
+      {
+        id: 12,
+        name: "KK2",
+        amount: "1 159k ₸",
+        icon: <Home className="h-8 w-8 text-white" />,
+        color: 'green'
+      },
+      {
+        id: 13,
+        name: "KK3",
+        amount: "86 100 ₸",
+        icon: <Home className="h-8 w-8 text-white" />,
+        color: 'green'
+      },
+      {
+        id: 14,
+        name: "Мария M200",
+        amount: "0 ₸",
+        icon: <Home className="h-8 w-8 text-white" />,
+        color: 'green'
+      },
+      {
+        id: 15,
+        name: "ЗП Руслан",
+        amount: "0 ₸",
+        icon: <Hammer className="h-8 w-8 text-white" />,
+        color: 'green'
+      },
+      {
+        id: 16,
+        name: "ЗП Ришат",
+        amount: "0 ₸",
+        icon: <Hammer className="h-8 w-8 text-white" />,
+        color: 'green'
+      }
+    ]
   }
 ];
 
-const packages = [
-  {
-    title: 'Базовый',
-    price: '50 000 ₸/мес',
-    features: [
-      'Бухгалтерский учет',
-      'Налоговая отчетность',
-      'Расчет зарплаты до 10 сотрудников',
-      'Консультации по телефону'
-    ]
-  },
-  {
-    title: 'Стандарт',
-    price: '100 000 ₸/мес',
-    features: [
-      'Все услуги пакета "Базовый"',
-      'Расчет зарплаты до 30 сотрудников',
-      'Кадровое делопроизводство',
-      'Оптимизация налогообложения',
-      'Выделенный бухгалтер'
-    ]
-  },
-  {
-    title: 'Премиум',
-    price: '150 000 ₸/мес',
-    features: [
-      'Все услуги пакета "Стандарт"',
-      'Расчет зарплаты без ограничений',
-      'Финансовый анализ',
-      'Управленческий учет',
-      'Приоритетная поддержка 24/7',
-      'Ежемесячные отчеты руководителю'
-    ]
+const summary = {
+  balance: "135.2M ₸",
+  expenses: "160.2M ₸",
+  planned: "0 ₸"
+};
+
+const getColorClass = (color: string) => {
+  switch (color) {
+    case 'blue':
+      return 'bg-cyan-500';
+    case 'yellow':
+      return 'bg-yellow-400';
+    case 'green':
+      return 'bg-emerald-500';
+    default:
+      return 'bg-gray-500';
   }
-];
+};
 
 export default function AccountingPage() {
+  const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({
+    personal: true,
+    vehicles: true,
+    operations: true
+  });
+  const [contextMenu, setContextMenu] = useState<ContextMenu>({
+    show: false,
+    x: 0,
+    y: 0,
+    accountId: null,
+    sectionId: null
+  });
+  const [editModal, setEditModal] = useState<{
+    show: boolean;
+    accountId: number | null;
+    currentName: string;
+  }>({
+    show: false,
+    accountId: null,
+    currentName: ''
+  });
+  const [sections, setSections] = useState(accountSections);
+
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionId]: !prev[sectionId]
+    }));
+  };
+
+  const handleContextMenu = (e: React.MouseEvent, accountId: number, sectionId: string) => {
+    e.preventDefault();
+    setContextMenu({
+      show: true,
+      x: e.clientX,
+      y: e.clientY,
+      accountId,
+      sectionId
+    });
+  };
+
+  const handleEditAccount = () => {
+    if (contextMenu.accountId) {
+      const section = sections.find(s => s.id === contextMenu.sectionId);
+      const account = section?.accounts.find(a => a.id === contextMenu.accountId);
+      if (account) {
+        setEditModal({
+          show: true,
+          accountId: contextMenu.accountId,
+          currentName: account.name
+        });
+      }
+    }
+    setContextMenu(prev => ({ ...prev, show: false }));
+  };
+
+  const handleDeleteAccount = () => {
+    if (contextMenu.accountId && contextMenu.sectionId) {
+      setSections(prevSections => 
+        prevSections.map(section => {
+          if (section.id === contextMenu.sectionId) {
+            return {
+              ...section,
+              accounts: section.accounts.filter(account => account.id !== contextMenu.accountId)
+            };
+          }
+          return section;
+        })
+      );
+    }
+    setContextMenu(prev => ({ ...prev, show: false }));
+  };
+
+  const handleSaveEdit = (newName: string) => {
+    if (editModal.accountId) {
+      setSections(prevSections => 
+        prevSections.map(section => ({
+          ...section,
+          accounts: section.accounts.map(account => 
+            account.id === editModal.accountId 
+              ? { ...account, name: newName }
+              : account
+          )
+        }))
+      );
+    }
+    setEditModal({ show: false, accountId: null, currentName: '' });
+  };
+
   return (
-    <div className="min-h-screen pt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <SEO 
-          title="Бухгалтерия компании - Профессиональные бухгалтерские услуги"
-          description="Профессиональные бухгалтерские услуги для строительных компаний ⭐ Полное ведение учета ⭐ Налоговая отчетность ⭐ Расчет зарплаты ⭐ Консультации"
-          keywords="бухгалтерские услуги, бухгалтерский учет, налоговая отчетность, расчет зарплаты, бухгалтерия строительной компании"
-          h1="Бухгалтерия компании"
-        />
+    <div className="min-h-screen">
+      <AccountingSidebar />
+      <div className="pl-64">
+        <div className="pt-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <SEO 
+              title="Бухгалтерия компании - Финансовый учет"
+              description="Финансовый учет и отчетность компании. Баланс, расходы и планируемые затраты."
+              keywords="бухгалтерия, финансы, учет, расходы, баланс"
+              h1="Бухгалтерия компании"
+            />
 
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto text-center mb-12">
-          Профессиональные бухгалтерские услуги для вашего бизнеса
-        </p>
-
-        {/* Services Section */}
-        <div className="mb-20">
-          <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">
-            Наши услуги
-          </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map((service, index) => (
-              <div 
-                key={index}
-                className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <div className="flex flex-col items-center text-center">
-                  <div className="mb-6 p-4 bg-primary-50 rounded-full">
-                    {service.icon}
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">
-                    {service.title}
-                  </h3>
-                  <p className="text-gray-600">
-                    {service.description}
-                  </p>
+            {/* Summary Section */}
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center">
+                  <div className="text-sm text-gray-600">Баланс</div>
+                  <div className="text-xl font-bold text-gray-900">{summary.balance}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-gray-600">Расходы</div>
+                  <div className="text-xl font-bold text-gray-900">{summary.expenses}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-gray-600">В планах</div>
+                  <div className="text-xl font-bold text-gray-900">{summary.planned}</div>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Packages Section */}
-        <div className="mb-20">
-          <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">
-            Тарифные планы
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {packages.map((pkg, index) => (
-              <div 
-                key={index}
-                className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 text-center">
-                  {pkg.title}
-                </h3>
-                <p className="text-3xl font-bold text-primary-600 mb-6 text-center">
-                  {pkg.price}
-                </p>
-                <ul className="space-y-4 mb-8">
-                  {pkg.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-center text-gray-600">
-                      <ArrowRight className="h-5 w-5 text-primary-600 mr-2 flex-shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <button
-                  onClick={() => {
-                    const phone = "77772282323";
-                    const message = `Здравствуйте! Меня интересует тариф "${pkg.title}" для бухгалтерского обслуживания.`;
-                    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
-                  }}
-                  className="w-full bg-primary-600 text-white py-3 rounded-xl hover:bg-primary-700 transition-colors"
-                >
-                  Выбрать тариф
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Contact Section */}
-        <div className="bg-primary-50 rounded-xl p-8">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Свяжитесь с нами
-              </h2>
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center text-gray-600">
-                  <Phone className="h-5 w-5 text-primary-600 mr-3" />
-                  <a href="tel:+77772282323">+7 (777) 228-23-23</a>
-                </div>
-                <div className="flex items-center text-gray-600">
-                  <Mail className="h-5 w-5 text-primary-600 mr-3" />
-                  <a href="mailto:info@dostupnydom.kz">info@dostupnydom.kz</a>
-                </div>
-                <div className="flex items-center text-gray-600">
-                  <MapPin className="h-5 w-5 text-primary-600 mr-3" />
-                  <span>г. Алматы, ул. Рыскулова, 232/3</span>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  const phone = "77772282323";
-                  const message = "Здравствуйте! Я хотел бы получить консультацию по бухгалтерским услугам.";
-                  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
-                }}
-                className="bg-primary-600 text-white px-8 py-3 rounded-xl hover:bg-primary-700 transition-colors shadow-lg shadow-primary-600/30"
-              >
-                Получить консультацию
-              </button>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Оставить заявку
-              </h3>
-              <form className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Ваше имя
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                  />
+
+            {/* Accounts Sections */}
+            <div className="space-y-8">
+              {sections.map((section) => (
+                <div key={section.id} className="bg-white rounded-xl shadow-lg overflow-hidden">
+                  <button
+                    onClick={() => toggleSection(section.id)}
+                    className="w-full px-6 py-4 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
+                  >
+                    <h2 className="text-lg font-semibold text-gray-900">{section.title}</h2>
+                    {expandedSections[section.id] ? (
+                      <ChevronUp className="h-5 w-5 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="h-5 w-5 text-gray-500" />
+                    )}
+                  </button>
+                  
+                  {expandedSections[section.id] && (
+                    <div className="p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                      {section.accounts.map((account) => (
+                        <div key={account.id} className="flex flex-col items-center">
+                          <div 
+                            className={`${getColorClass(account.color)} rounded-full p-6 mb-2 shadow-lg cursor-pointer`}
+                            onContextMenu={(e) => handleContextMenu(e, account.id, section.id)}
+                          >
+                            {account.icon}
+                          </div>
+                          <div className="text-center">
+                            <div className="font-medium text-gray-900 mb-1">{account.name}</div>
+                            <div className={`text-sm ${account.amount.includes('-') ? 'text-red-600' : 'text-gray-600'}`}>
+                              {account.amount}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Телефон
-                  </label>
-                  <input
-                    type="tel"
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Сообщение
-                  </label>
-                  <textarea
-                    rows={4}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                  ></textarea>
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-primary-600 text-white py-3 rounded-xl hover:bg-primary-700 transition-colors"
-                >
-                  Отправить
-                </button>
-              </form>
+              ))}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Context Menu */}
+      {contextMenu.show && (
+        <AccountContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onEdit={handleEditAccount}
+          onDelete={handleDeleteAccount}
+          onClose={() => setContextMenu(prev => ({ ...prev, show: false }))}
+        />
+      )}
+
+      {/* Edit Modal */}
+      {editModal.show && (
+        <EditAccountModal
+          isOpen={editModal.show}
+          onClose={() => setEditModal({ show: false, accountId: null, currentName: '' })}
+          onSave={handleSaveEdit}
+          currentName={editModal.currentName}
+        />
+      )}
     </div>
   );
 }
