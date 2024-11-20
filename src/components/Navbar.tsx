@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { X, Building2, Phone, Menu } from 'lucide-react';
+import { X, Building2, Phone, Menu, Wallet } from 'lucide-react';
 
 interface NavbarProps {
   isOpen: boolean;
@@ -85,6 +85,13 @@ export default function Navbar({ isOpen, setIsOpen }: NavbarProps) {
             >
               О нас
             </Link>
+            <Link
+              to="/accounting"
+              className="text-secondary-600 hover:text-primary-600 transition-colors flex items-center gap-2"
+              title="Бухгалтерия компании"
+            >
+              <Wallet className="h-5 w-5" />
+            </Link>
             <a 
               href="tel:+77772282323"
               className="flex items-center text-secondary-600 hover:text-primary-600 transition-colors"
@@ -147,6 +154,16 @@ export default function Navbar({ isOpen, setIsOpen }: NavbarProps) {
               onClick={() => setIsOpen(false)}
             >
               О нас
+            </Link>
+            <Link 
+              to="/accounting"
+              className="block px-3 py-2 text-secondary-600 hover:text-primary-600"
+              onClick={() => setIsOpen(false)}
+            >
+              <div className="flex items-center">
+                <Wallet className="h-5 w-5 mr-2" />
+                Бухгалтерия компании
+              </div>
             </Link>
             <button 
               className="w-full text-left px-3 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
