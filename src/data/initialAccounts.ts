@@ -14,7 +14,7 @@ export const initialSections: AccountSection[] = [
       },
       {
         id: 2,
-        name: "Еркынгали",
+        name: "Еркынгали", 
         amount: "75 000 ₸",
         iconType: 'user',
         color: 'blue'
@@ -137,4 +137,4 @@ export const initialSections: AccountSection[] = [
       }
     ]
   }
-];</content>
+];
