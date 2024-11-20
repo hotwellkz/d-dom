@@ -37,6 +37,7 @@ import LaminatedTimberHousesPage from './pages/LaminatedTimberHousesPage';
 import AccountingPage from './pages/AccountingPage';
 import FeedPage from './pages/FeedPage';
 import DailyReportPage from './pages/DailyReportPage';
+import BuilderCalculatorPage from './pages/BuilderCalculatorPage';
 
 export default function App() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -80,6 +81,7 @@ export default function App() {
               <Route path="/accounting" element={<AccountingPage />} />
               <Route path="/accounting/feed" element={<FeedPage />} />
               <Route path="/accounting/daily-report" element={<DailyReportPage />} />
+              <Route path="/accounting/builder-calculator" element={<BuilderCalculatorPage />} />
             </Routes>
           </main>
           <Footer />
