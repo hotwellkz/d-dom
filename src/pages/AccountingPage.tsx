@@ -6,9 +6,10 @@ import EditAccountModal from '../components/EditAccountModal';
 import CreateAccountModal from '../components/CreateAccountModal';
 import TransactionModal from '../components/TransactionModal';
 import AccountDetailsModal from '../components/AccountDetailsModal';
+import AccountIcon from '../components/AccountIcon';
 import { useAccounts } from '../hooks/useAccounts';
 import { AccountItem } from '../types/accounting';
-import { User, Car, Building2, Calculator, Home, Hammer } from 'lucide-react';
+import { IconType } from '../types/icons';
 
 const summary = {
   balance: "135.2M ₸",
@@ -105,38 +106,14 @@ export default function AccountingPage() {
     });
   };
 
-  const handleSaveNewAccount = (name: string, iconType: string, color: 'blue' | 'yellow' | 'green', sectionId: string) => {
+  const handleSaveNewAccount = (name: string, iconType: IconType, color: 'blue' | 'yellow' | 'green', sectionId: string) => {
     const newId = Math.max(...sections.flatMap(s => s.accounts.map(a => a.id))) + 1;
     
-    let icon;
-    switch (iconType) {
-      case 'user':
-        icon = <User className="h-8 w-8 text-white" />;
-        break;
-      case 'car':
-        icon = <Car className="h-8 w-8 text-white" />;
-        break;
-      case 'building':
-        icon = <Building2 className="h-8 w-8 text-white" />;
-        break;
-      case 'calculator':
-        icon = <Calculator className="h-8 w-8 text-white" />;
-        break;
-      case 'home':
-        icon = <Home className="h-8 w-8 text-white" />;
-        break;
-      case 'hammer':
-        icon = <Hammer className="h-8 w-8 text-white" />;
-        break;
-      default:
-        icon = <User className="h-8 w-8 text-white" />;
-    }
-
     const newAccount: AccountItem = {
       id: newId,
       name,
       amount: "0 ₸",
-      icon,
+      iconType,
       color
     };
 
@@ -256,7 +233,7 @@ export default function AccountingPage() {
                               onDrop={(e) => handleDrop(e, account)}
                               onDragEnd={handleDragEnd}
                             >
-                              {account.icon}
+                              <AccountIcon type={account.iconType} />
                             </div>
                             <div className="text-center">
                               <div className="font-medium text-gray-900 mb-1">{account.name}</div>
