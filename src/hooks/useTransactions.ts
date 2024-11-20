@@ -15,12 +15,8 @@ export function useTransactions(accountId: number) {
     localStorage.setItem(storageKey, JSON.stringify(transactions));
   }, [transactions, storageKey]);
 
-  const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
-    const newTransaction = {
-      ...transaction,
-      id: Date.now()
-    };
-    setTransactions(prev => [...prev, newTransaction]);
+  const addTransaction = (transaction: Transaction) => {
+    setTransactions(prev => [...prev, transaction]);
   };
 
   const clearTransactions = () => {
