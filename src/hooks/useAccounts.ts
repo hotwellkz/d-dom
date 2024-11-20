@@ -1,14 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AccountSection, AccountItem } from '../types/accounting';
 import { initialSections } from '../data/initialAccounts';
 
+const STORAGE_KEY = 'accountData';
+
 export function useAccounts() {
-  const [sections, setSections] = useState<AccountSection[]>(initialSections);
+  // Загружаем данные из localStorage при инициализации
+  const loadInitialData = () => {
+    const savedData = localStorage.getItem(STORAGE_KEY);
+    return savedData ? JSON.parse(savedData) : initialSections;
+  };
+
+  const [sections, setSections] = useState<AccountSection[]>(loadInitialData);
   const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({
     clients: true,
     personal: true,
     objects: true
   });
+
+  // Сохраняем данные в localStorage при каждом изменении
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sections));
+  }, [sections]);
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections(prev => ({
@@ -72,6 +85,28 @@ export function useAccounts() {
     );
   };
 
+  const clearAccountHistory = (accountId: number) => {
+    // Очищаем историю транзакций и сбрасываем сумму
+    setSections(prevSections =>
+      prevSections.map(section => ({
+        ...section,
+        accounts: section.accounts.map(account => {
+          if (account.id === accountId) {
+            return {
+              ...account,
+              amount: "0 ₸"
+            };
+          }
+          return account;
+        })
+      }))
+    );
+
+    // Очищаем историю в localStorage
+    const storageKey = `transactions_${accountId}`;
+    localStorage.removeItem(storageKey);
+  };
+
   return {
     sections,
     expandedSections,
@@ -79,6 +114,7 @@ export function useAccounts() {
     updateAccount,
     deleteAccount,
     addAccount,
-    updateAccountAmount
+    updateAccountAmount,
+    clearAccountHistory
   };
 }
