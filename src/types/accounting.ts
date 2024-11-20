@@ -1,10 +1,10 @@
-import { ReactNode } from 'react';
+import { IconType } from './icons';
 
 export interface AccountItem {
   id: number;
   name: string;
   amount: string;
-  icon: ReactNode;
+  iconType: IconType;
   color: 'blue' | 'yellow' | 'green';
 }
 
