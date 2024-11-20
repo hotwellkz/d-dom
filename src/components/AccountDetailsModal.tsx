@@ -44,18 +44,23 @@ export default function AccountDetailsModal({ account, onClose }: AccountDetails
                   <div key={transaction.id} className="py-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="font-medium text-gray-900">{transaction.description}</p>
+                        <p className="font-medium text-gray-900">
+                          {transaction.fromAccountId === account.id ? 
+                            `Перевод для ${transaction.toAccountName}` : 
+                            `Получено от ${transaction.fromAccountName}`}
+                        </p>
                         <p className="text-sm text-gray-500">{transaction.date}</p>
+                        <p className="text-sm text-gray-600 mt-1">{transaction.description}</p>
                       </div>
                       <p className={`font-semibold ${
-                        transaction.amount.startsWith('-') ? 'text-red-600' : 'text-green-600'
+                        transaction.fromAccountId === account.id ? 
+                          'text-red-600' : 
+                          'text-green-600'
                       }`}>
-                        {transaction.amount}
+                        {transaction.fromAccountId === account.id ? '- ' : '+ '}
+                        {transaction.amount.toLocaleString()} ₸
                       </p>
                     </div>
-                    {transaction.note && (
-                      <p className="mt-1 text-sm text-gray-600">{transaction.note}</p>
-                    )}
                   </div>
                 ))}
               </div>
