@@ -1,6 +1,7 @@
 import React from 'react';
 import { ChevronUp, ChevronDown, Plus } from 'lucide-react';
 import { AccountSection as AccountSectionType, AccountItem } from '../types/accounting';
+import AccountIcon from './AccountIcon';
 
 interface AccountSectionProps {
   section: AccountSectionType;
@@ -62,7 +63,7 @@ export default function AccountSection({
                   onDrop={(e) => onDrop(e, account)}
                   onDragEnd={onDragEnd}
                 >
-                  {account.icon}
+                  <AccountIcon type={account.iconType} />
                 </div>
                 <div className="text-center">
                   <div className="font-medium text-gray-900 mb-1">{account.name}</div>
