@@ -182,6 +182,22 @@ export default function AccountingPage() {
     setTransactionModal({ show: false });
   };
 
+  const handleClearAllHistory = () => {
+    // Очищаем историю всех счетов
+    sections.forEach(section => {
+      section.accounts.forEach(account => {
+        clearAccountHistory(account.id);
+      });
+    });
+
+    // Сбрасываем все балансы на 0
+    sections.forEach(section => {
+      section.accounts.forEach(account => {
+        updateAccount(account.id, { amount: "0 ₸" });
+      });
+    });
+  };
+
   const getColorClass = (color: string) => {
     switch (color) {
       case 'blue':
@@ -208,7 +224,10 @@ export default function AccountingPage() {
               h1="Бухгалтерия компании"
             />
 
-            <AccountSummary summary={summary} />
+            <AccountSummary 
+              summary={summary} 
+              onClearAll={handleClearAllHistory}
+            />
 
             <div className="space-y-8">
               {sections.map((section) => (
