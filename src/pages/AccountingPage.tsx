@@ -107,7 +107,7 @@ export default function AccountingPage() {
     });
   };
 
-  const handleSaveNewAccount = (name: string, iconType: IconType, color: 'blue' | 'yellow' | 'green', sectionId: string) => {
+  const handleSaveNewAccount = (name: string, iconType: IconType, color: 'blue' | 'yellow' | 'green' | 'purple', sectionId: string) => {
     const newId = Math.max(...sections.flatMap(s => s.accounts.map(a => a.id))) + 1;
     
     const newAccount: AccountItem = {
@@ -206,6 +206,8 @@ export default function AccountingPage() {
         return 'bg-yellow-400';
       case 'green':
         return 'bg-emerald-500';
+      case 'purple':
+        return 'bg-purple-500';
       default:
         return 'bg-gray-500';
     }
