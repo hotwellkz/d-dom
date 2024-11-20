@@ -34,8 +34,8 @@ interface AccountSection {
 
 const initialSections: AccountSection[] = [
   {
-    id: 'personal',
-    title: 'Личные счета',
+    id: 'clients',
+    title: 'Клиенты',
     accounts: [
       {
         id: 1,
@@ -68,8 +68,8 @@ const initialSections: AccountSection[] = [
     ]
   },
   {
-    id: 'vehicles',
-    title: 'Транспорт и управление',
+    id: 'personal',
+    title: 'Личные счета',
     accounts: [
       {
         id: 5,
@@ -102,8 +102,8 @@ const initialSections: AccountSection[] = [
     ]
   },
   {
-    id: 'operations',
-    title: 'Операционные счета',
+    id: 'objects',
+    title: 'Объекты',
     accounts: [
       {
         id: 9,
@@ -146,9 +146,9 @@ const summary = {
 export default function AccountingPage() {
   const [sections, setSections] = useState<AccountSection[]>(initialSections);
   const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({
+    clients: true,
     personal: true,
-    vehicles: true,
-    operations: true
+    objects: true
   });
 
   const [contextMenu, setContextMenu] = useState<{
@@ -463,9 +463,7 @@ export default function AccountingPage() {
                           <div className="bg-gray-200 rounded-full p-6 mb-2 shadow-lg hover:bg-gray-300 transition-colors">
                             <Plus className="h-8 w-8 text-gray-600" />
                           </div>
-                          <div className="text-center">
                             <div className="font-medium text-gray-600">Добавить счет</div>
-                          </div>
                         </button>
                       </div>
                     </div>
