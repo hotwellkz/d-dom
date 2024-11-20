@@ -5,7 +5,7 @@ import { IconType } from '../types/icons';
 interface CreateAccountModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (name: string, iconType: IconType, color: 'blue' | 'yellow' | 'green', sectionId: string) => void;
+  onSave: (name: string, iconType: IconType, color: 'blue' | 'yellow' | 'green' | 'purple', sectionId: string) => void;
   sectionId: string;
 }
 
@@ -16,18 +16,19 @@ const icons: { id: IconType; icon: React.ReactNode; label: string }[] = [
   { id: 'calculator', icon: <Calculator className="h-6 w-6 text-white" />, label: 'Калькулятор' },
   { id: 'home', icon: <Home className="h-6 w-6 text-white" />, label: 'Дом' },
   { id: 'hammer', icon: <Hammer className="h-6 w-6 text-white" />, label: 'Инструменты' }
-];
+] as const;
 
 const colors = [
   { id: 'blue', label: 'Синий', class: 'bg-cyan-500' },
   { id: 'yellow', label: 'Желтый', class: 'bg-yellow-400' },
-  { id: 'green', label: 'Зеленый', class: 'bg-emerald-500' }
-] as const;
+  { id: 'green', label: 'Зеленый', class: 'bg-emerald-500' },
+  { id: 'purple', label: 'Фиолетовый', class: 'bg-purple-500' }
+];
 
 export default function CreateAccountModal({ isOpen, onClose, onSave, sectionId }: CreateAccountModalProps) {
   const [name, setName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState<IconType>('user');
-  const [selectedColor, setSelectedColor] = useState<'blue' | 'yellow' | 'green'>('blue');
+  const [selectedColor, setSelectedColor] = useState<'blue' | 'yellow' | 'green' | 'purple'>('blue');
 
   if (!isOpen) return null;
 
@@ -99,12 +100,12 @@ export default function CreateAccountModal({ isOpen, onClose, onSave, sectionId 
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Цвет
               </label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-4 gap-3">
                 {colors.map((color) => (
                   <button
                     key={color.id}
                     type="button"
-                    onClick={() => setSelectedColor(color.id)}
+                    onClick={() => setSelectedColor(color.id as 'blue' | 'yellow' | 'green' | 'purple')}
                     className={`p-3 rounded-lg flex items-center justify-center ${
                       selectedColor === color.id 
                         ? 'ring-2 ring-primary-500' 
