@@ -9,7 +9,6 @@ import AccountDetailsModal from '../components/AccountDetailsModal';
 import AccountSection from '../components/AccountSection';
 import AccountSummary from '../components/AccountSummary';
 import { useAccounts } from '../hooks/useAccounts';
-import { useTransactions } from '../hooks/useTransactions';
 import { AccountItem, Transaction } from '../types/accounting';
 import { IconType } from '../types/icons';
 
@@ -170,12 +169,15 @@ export default function AccountingPage() {
       updateAccountAmount(transactionModal.fromAccount.id, -amount);
       updateAccountAmount(transactionModal.toAccount.id, amount);
 
-      // Сохраняем транзакцию в историю обоих счетов
-      const { addTransaction: addFromTransaction } = useTransactions(transactionModal.fromAccount.id);
-      const { addTransaction: addToTransaction } = useTransactions(transactionModal.toAccount.id);
+      // Сохраняем транзакцию в localStorage для обоих счетов
+      const fromStorageKey = `transactions_${transactionModal.fromAccount.id}`;
+      const toStorageKey = `transactions_${transactionModal.toAccount.id}`;
 
-      addFromTransaction(transaction);
-      addToTransaction(transaction);
+      const fromTransactions = JSON.parse(localStorage.getItem(fromStorageKey) || '[]');
+      const toTransactions = JSON.parse(localStorage.getItem(toStorageKey) || '[]');
+
+      localStorage.setItem(fromStorageKey, JSON.stringify([...fromTransactions, transaction]));
+      localStorage.setItem(toStorageKey, JSON.stringify([...toTransactions, transaction]));
     }
     setTransactionModal({ show: false });
   };
