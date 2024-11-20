@@ -25,7 +25,8 @@ const routes = [
   { path: '/derevyannye-doma-almaty', name: 'Деревянные дома в Алматы' },
   { path: '/doma-iz-brusa-almaty', name: 'Дома из бруса в Алматы' },
   { path: '/proekty-domov-iz-sip-panelej-do-100m2', name: 'Проекты домов из СИП панелей до 100м2' },
-  { path: '/stroitelstvo-domov-iz-kleenogo-brusa', name: 'Строительство домов из клееного бруса' }
+  { path: '/stroitelstvo-domov-iz-kleenogo-brusa', name: 'Строительство домов из клееного бруса' },
+  { path: '/accounting', name: 'Бухгалтерия компании' }
 ];
 
 export default function SiteStructurePage() {
