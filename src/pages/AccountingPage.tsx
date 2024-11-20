@@ -4,6 +4,7 @@ import AccountingSidebar from '../components/AccountingSidebar';
 import AccountContextMenu from '../components/AccountContextMenu';
 import EditAccountModal from '../components/EditAccountModal';
 import CreateAccountModal from '../components/CreateAccountModal';
+import AccountDetailsModal from '../components/AccountDetailsModal';
 import { 
   User, 
   Car, 
@@ -240,6 +241,14 @@ export default function AccountingPage() {
     sectionId: null
   });
 
+  const [detailsModal, setDetailsModal] = useState<{
+    show: boolean;
+    account: AccountItem | null;
+  }>({
+    show: false,
+    account: null
+  });
+
   const [sections, setSections] = useState(accountSections);
 
   const toggleSection = (sectionId: string) => {
@@ -333,6 +342,13 @@ export default function AccountingPage() {
     setCreateModal({ show: false, sectionId: null });
   };
 
+  const handleAccountClick = (account: AccountItem) => {
+    setDetailsModal({
+      show: true,
+      account
+    });
+  };
+
   return (
     <div className="min-h-screen">
       <AccountingSidebar />
@@ -387,6 +403,7 @@ export default function AccountingPage() {
                           <div key={account.id} className="flex flex-col items-center">
                             <div 
                               className={`${getColorClass(account.color)} rounded-full p-6 mb-2 shadow-lg cursor-pointer`}
+                              onClick={() => handleAccountClick(account)}
                               onContextMenu={(e) => handleContextMenu(e, account.id, section.id)}
                             >
                               {account.icon}
@@ -446,6 +463,15 @@ export default function AccountingPage() {
                 onClose={() => setCreateModal({ show: false, sectionId: null })}
                 onSave={handleCreateAccount}
                 sectionId={createModal.sectionId}
+              />
+            )}
+
+            {/* Details Modal */}
+            {detailsModal.show && detailsModal.account && (
+              <AccountDetailsModal
+                isOpen={detailsModal.show}
+                onClose={() => setDetailsModal({ show: false, account: null })}
+                account={detailsModal.account}
               />
             )}
           </div>
