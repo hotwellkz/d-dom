@@ -5,7 +5,7 @@ export interface AccountItem {
   name: string;
   amount: string;
   iconType: IconType;
-  color: 'blue' | 'yellow' | 'green';
+  color: 'blue' | 'yellow' | 'green' | 'purple';
 }
 
 export interface AccountSection {
@@ -16,13 +16,13 @@ export interface AccountSection {
 
 export interface Transaction {
   id: number;
-  date: string;
   fromAccountId: number;
   fromAccountName: string;
   toAccountId: number;
   toAccountName: string;
   amount: number;
   description: string;
+  date: string;
 }
 
 export interface AccountSummary {
