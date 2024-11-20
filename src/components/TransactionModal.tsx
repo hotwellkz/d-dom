@@ -1,19 +1,12 @@
 import React, { useState } from 'react';
 import { X, Calendar } from 'lucide-react';
+import { AccountItem } from '../types/accounting';
 
 interface TransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  fromAccount: {
-    id: number;
-    name: string;
-    amount: string;
-  };
-  toAccount: {
-    id: number;
-    name: string;
-    amount: string;
-  };
+  fromAccount: AccountItem;
+  toAccount: AccountItem;
   onSave: (amount: number, description: string, date: string) => void;
 }
 
@@ -33,8 +26,8 @@ export default function TransactionModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const numAmount = parseFloat(amount.replace(/[^0-9.-]+/g, ''));
-    if (!isNaN(numAmount)) {
-      onSave(numAmount, description, date);
+    if (!isNaN(numAmount) && description.trim()) {
+      onSave(numAmount, description.trim(), date);
       setAmount('');
       setDescription('');
       onClose();
