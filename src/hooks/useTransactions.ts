@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Transaction } from '../types/accounting';
 
+const STORAGE_KEY_PREFIX = 'transactions_';
+
 export function useTransactions(accountId: number) {
-  const storageKey = `transactions_${accountId}`;
+  const storageKey = `${STORAGE_KEY_PREFIX}${accountId}`;
   
   const [transactions, setTransactions] = useState<Transaction[]>(() => {
     const savedTransactions = localStorage.getItem(storageKey);
