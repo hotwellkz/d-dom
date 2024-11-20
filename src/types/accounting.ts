@@ -17,10 +17,12 @@ export interface AccountSection {
 export interface Transaction {
   id: number;
   date: string;
+  fromAccountId: number;
+  fromAccountName: string;
+  toAccountId: number;
+  toAccountName: string;
+  amount: number;
   description: string;
-  amount: string;
-  category: string;
-  note?: string;
 }
 
 export interface AccountSummary {
