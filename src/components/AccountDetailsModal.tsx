@@ -12,13 +12,30 @@ interface AccountDetailsModalProps {
 export default function AccountDetailsModal({ account, onClose }: AccountDetailsModalProps) {
   const { transactions } = useTransactions(account.id);
 
+  // Группируем транзакции по датам
+  const groupedTransactions = transactions.reduce((groups, transaction) => {
+    const date = new Date(transaction.date);
+    const dateKey = date.toLocaleDateString('ru-RU', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'long'
+    });
+    
+    if (!groups[dateKey]) {
+      groups[dateKey] = [];
+    }
+    groups[dateKey].push(transaction);
+    return groups;
+  }, {} as Record<string, typeof transactions>);
+
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={onClose} />
         
-        <div className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl p-6">
-          <div className="flex justify-between items-center mb-6">
+        <div className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl">
+          {/* Заголовок */}
+          <div className="flex justify-between items-center p-6 border-b border-gray-200">
             <div className="flex items-center gap-4">
               <div className={`${getColorClass(account.color)} rounded-full p-4`}>
                 <AccountIcon type={account.iconType} />
@@ -35,37 +52,54 @@ export default function AccountDetailsModal({ account, onClose }: AccountDetails
             </button>
           </div>
 
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-gray-900">История операций</h4>
-            
-            {transactions.length > 0 ? (
-              <div className="divide-y divide-gray-200">
-                {transactions.map((transaction) => (
-                  <div key={transaction.id} className="py-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {transaction.fromAccountId === account.id ? 
-                            `Перевод для ${transaction.toAccountName}` : 
-                            `Получено от ${transaction.fromAccountName}`}
-                        </p>
-                        <p className="text-sm text-gray-500">{transaction.date}</p>
-                        <p className="text-sm text-gray-600 mt-1">{transaction.description}</p>
-                      </div>
-                      <p className={`font-semibold ${
-                        transaction.fromAccountId === account.id ? 
-                          'text-red-600' : 
-                          'text-green-600'
-                      }`}>
-                        {transaction.fromAccountId === account.id ? '- ' : '+ '}
-                        {transaction.amount.toLocaleString()} ₸
-                      </p>
-                    </div>
+          {/* Список транзакций */}
+          <div className="overflow-y-auto max-h-[70vh]">
+            {Object.entries(groupedTransactions).length > 0 ? (
+              Object.entries(groupedTransactions).map(([date, dateTransactions]) => (
+                <div key={date} className="border-b border-gray-100 last:border-0">
+                  {/* Дата */}
+                  <div className="px-6 py-3 bg-gray-50">
+                    <h4 className="text-sm font-medium text-gray-500 uppercase">
+                      {date}
+                    </h4>
                   </div>
-                ))}
-              </div>
+
+                  {/* Транзакции за дату */}
+                  <div className="divide-y divide-gray-100">
+                    {dateTransactions.map((transaction) => (
+                      <div key={transaction.id} className="px-6 py-4 hover:bg-gray-50">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-gray-900">
+                                {transaction.fromAccountId === account.id ? 
+                                  transaction.toAccountName : 
+                                  transaction.fromAccountName}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                {transaction.description}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className={`font-semibold ${
+                              transaction.fromAccountId === account.id ? 
+                                'text-red-600' : 
+                                'text-green-600'
+                            }`}>
+                              {transaction.fromAccountId === account.id ? '- ' : '+ '}
+                              {transaction.amount.toLocaleString()} ₸
+                            </p>
+                            <p className="text-sm text-gray-500">изменение</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
             ) : (
-              <div className="text-center py-8 bg-gray-50 rounded-lg">
+              <div className="text-center py-12">
                 <p className="text-gray-500">История операций пуста</p>
               </div>
             )}
