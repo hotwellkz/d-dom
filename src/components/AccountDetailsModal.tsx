@@ -118,6 +118,8 @@ function getColorClass(color: string) {
       return 'bg-yellow-400';
     case 'green':
       return 'bg-emerald-500';
+    case 'purple':
+      return 'bg-purple-500';
     default:
       return 'bg-gray-500';
   }
