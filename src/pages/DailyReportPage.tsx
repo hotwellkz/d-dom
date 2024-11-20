@@ -1,72 +1,60 @@
 import React from 'react';
 import SEO from '../components/SEO';
 import AccountingSidebar from '../components/AccountingSidebar';
+import { Transaction } from '../types/accounting';
 
-interface Transaction {
-  id: number;
-  name: string;
-  amount: string;
-  isExpense: boolean;
+function getAllTransactions(): Transaction[] {
+  // Получаем все ключи из localStorage, которые начинаются с 'transactions_'
+  const keys = Object.keys(localStorage).filter(key => key.startsWith('transactions_'));
+  
+  // Собираем все транзакции из всех счетов
+  const allTransactions = keys.reduce((acc: Transaction[], key) => {
+    const transactions = JSON.parse(localStorage.getItem(key) || '[]');
+    return [...acc, ...transactions];
+  }, []);
+
+  // Сортируем по дате (самые новые сверху)
+  return allTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
-const transactions: Transaction[] = [
-  {
-    id: 1,
-    name: "Асхат/Куралай Кегень",
-    amount: "16 368k ₸",
-    isExpense: false
-  },
-  {
-    id: 2,
-    name: "Гульжемал 65кв.м",
-    amount: "3 534k ₸",
-    isExpense: false
-  },
-  {
-    id: 3,
-    name: "Пополнение",
-    amount: "260 000 ₸",
-    isExpense: false
-  },
-  {
-    id: 4,
-    name: "Алдияр Шымкент",
-    amount: "12 500 ₸",
-    isExpense: true
-  },
-  {
-    id: 5,
-    name: "Сайвали ДомЦех",
-    amount: "18 175 ₸",
-    isExpense: true
-  },
-  {
-    id: 6,
-    name: "ЗПАлдияр Шымкент",
-    amount: "100 000 ₸",
-    isExpense: true
-  },
-  {
-    id: 7,
-    name: "Михаил 144 Панфилова",
-    amount: "319 000 ₸",
-    isExpense: true
-  },
-  {
-    id: 8,
-    name: "Пеноп Клей OSB",
-    amount: "396 000 ₸",
-    isExpense: true
-  }
-];
-
-const summary = {
-  totalAmount: "+ 16 276k ₸",
-  income: "+ 20 162k ₸",
-  expenses: "- 3 886k ₸"
-};
+interface DailySummary {
+  totalAmount: number;
+  income: number;
+  expenses: number;
+  transactions: Transaction[];
+}
 
 export default function DailyReportPage() {
+  const transactions = getAllTransactions();
+
+  // Группируем транзакции по дням и считаем итоги
+  const dailyReports = transactions.reduce((acc: Record<string, DailySummary>, transaction) => {
+    const date = new Date(transaction.date).toLocaleDateString('ru-RU');
+    
+    if (!acc[date]) {
+      acc[date] = {
+        totalAmount: 0,
+        income: 0,
+        expenses: 0,
+        transactions: []
+      };
+    }
+
+    // Добавляем транзакцию в список
+    acc[date].transactions.push(transaction);
+
+    // Обновляем суммы
+    const amount = transaction.amount;
+    acc[date].totalAmount += amount;
+    if (amount > 0) {
+      acc[date].income += amount;
+    } else {
+      acc[date].expenses += Math.abs(amount);
+    }
+
+    return acc;
+  }, {});
+
   return (
     <div className="min-h-screen">
       <AccountingSidebar />
@@ -80,62 +68,85 @@ export default function DailyReportPage() {
               h1="Отчет по дням"
             />
 
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              {/* Date Navigation */}
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    15 ноября 2024
-                  </h2>
-                  <div className="flex space-x-1">
-                    {Array(17).fill(0).map((_, i) => (
-                      <div 
-                        key={i} 
-                        className={`w-2 h-2 rounded-full ${i === 14 ? 'bg-primary-600' : 'bg-gray-300'}`}
-                      />
+            <div className="space-y-6">
+              {Object.entries(dailyReports).map(([date, summary]) => (
+                <div key={date} className="bg-white rounded-xl shadow-lg overflow-hidden">
+                  {/* Дата и итоги дня */}
+                  <div className="p-6 bg-gray-50 border-b border-gray-200">
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-xl font-bold text-gray-900">
+                        {new Date(date).toLocaleDateString('ru-RU', {
+                          weekday: 'long',
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })}
+                      </h2>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center">
+                        <div className="text-sm text-gray-600">Итого за день</div>
+                        <div className={`text-lg font-bold ${
+                          summary.totalAmount >= 0 ? 'text-emerald-600' : 'text-red-600'
+                        }`}>
+                          {summary.totalAmount.toLocaleString()} ₸
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm text-gray-600">Приход</div>
+                        <div className="text-lg font-bold text-emerald-600">
+                          +{summary.income.toLocaleString()} ₸
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm text-gray-600">Расход</div>
+                        <div className="text-lg font-bold text-red-600">
+                          -{summary.expenses.toLocaleString()} ₸
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Список транзакций */}
+                  <div className="divide-y divide-gray-200">
+                    {summary.transactions.map((transaction) => (
+                      <div key={transaction.id} className="p-6 hover:bg-gray-50 transition-colors">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-medium text-gray-900">
+                                {transaction.fromAccountName}
+                              </h3>
+                              <span className="text-gray-500">→</span>
+                              <h3 className="font-medium text-gray-900">
+                                {transaction.toAccountName}
+                              </h3>
+                            </div>
+                            <p className="text-sm text-gray-500 mt-1">
+                              {transaction.description}
+                            </p>
+                          </div>
+                          <div className="text-lg font-semibold text-red-600">
+                            {transaction.amount.toLocaleString()} ₸
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-500">
+                          {new Date(transaction.date).toLocaleTimeString('ru-RU', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
                     ))}
                   </div>
                 </div>
-              </div>
+              ))}
 
-              {/* Total Amount */}
-              <div className="p-8 text-center border-b border-gray-200">
-                <div className="text-4xl font-bold text-emerald-500">
-                  {summary.totalAmount}
+              {Object.keys(dailyReports).length === 0 && (
+                <div className="bg-white rounded-xl shadow-lg p-8 text-center text-gray-500">
+                  История операций пуста
                 </div>
-              </div>
-
-              {/* Transactions List */}
-              <div className="divide-y divide-gray-200">
-                {transactions.map((transaction) => (
-                  <div key={transaction.id} className="p-6 hover:bg-gray-50 transition-colors">
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-medium text-gray-900">
-                        {transaction.name}
-                      </h3>
-                      <span className={`text-lg font-semibold ${
-                        transaction.isExpense ? 'text-red-600' : 'text-emerald-500'
-                      }`}>
-                        {transaction.isExpense ? '- ' : '+ '}{transaction.amount}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Summary */}
-              <div className="p-6 bg-gray-50">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center text-lg">
-                    <span className="font-medium text-gray-900">Доход</span>
-                    <span className="font-semibold text-emerald-500">{summary.income}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-lg">
-                    <span className="font-medium text-gray-900">Расход</span>
-                    <span className="font-semibold text-red-600">{summary.expenses}</span>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
