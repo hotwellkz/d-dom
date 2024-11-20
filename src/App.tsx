@@ -33,6 +33,7 @@ import LogHousesAlmatyPage from './pages/LogHousesAlmatyPage';
 import SmallSipHousesPage from './pages/SmallSipHousesPage';
 import FrameHousesPricePage from './pages/FrameHousesPricePage';
 import LaminatedTimberHousesPage from './pages/LaminatedTimberHousesPage';
+import AccountingPage from './pages/AccountingPage';
 
 export default function App() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -72,6 +73,7 @@ export default function App() {
             <Route path="/doma-iz-brusa-almaty" element={<LogHousesAlmatyPage />} />
             <Route path="/proekty-domov-iz-sip-panelej-do-100m2" element={<SmallSipHousesPage />} />
             <Route path="/stroitelstvo-domov-iz-kleenogo-brusa" element={<LaminatedTimberHousesPage />} />
+            <Route path="/accounting" element={<AccountingPage />} />
           </Routes>
         </main>
         <Footer />
