@@ -10,7 +10,8 @@ import {
   MessageSquare,
   Settings,
   HelpCircle,
-  RefreshCw
+  RefreshCw,
+  Calculator
 } from 'lucide-react';
 
 interface MenuItem {
@@ -35,6 +36,11 @@ const menuItems: MenuItem[] = [
     icon: <Receipt className="h-5 w-5" />,
     label: 'Отчет по дням',
     path: '/accounting/daily-report'
+  },
+  {
+    icon: <Calculator className="h-5 w-5" />,
+    label: 'Калькулятор работ',
+    path: '/accounting/builder-calculator'
   },
   {
     icon: <PieChart className="h-5 w-5" />,
