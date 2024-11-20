@@ -6,8 +6,6 @@ import EditAccountModal from '../components/EditAccountModal';
 import CreateAccountModal from '../components/CreateAccountModal';
 import TransactionModal from '../components/TransactionModal';
 import AccountDetailsModal from '../components/AccountDetailsModal';
-import AccountSection from '../components/AccountSection';
-import AccountSummary from '../components/AccountSummary';
 import { useAccounts } from '../hooks/useAccounts';
 import { AccountItem } from '../types/accounting';
 import { User, Car, Building2, Calculator, Home, Hammer } from 'lucide-react';
@@ -182,6 +180,7 @@ export default function AccountingPage() {
       // Начисляем на другой счет
       updateAccountAmount(transactionModal.toAccount.id, amount);
     }
+    setTransactionModal({ show: false });
   };
 
   const getColorClass = (color: string) => {
@@ -210,25 +209,78 @@ export default function AccountingPage() {
               h1="Бухгалтерия компании"
             />
 
-            <AccountSummary summary={summary} />
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center">
+                  <div className="text-sm text-gray-600">Баланс</div>
+                  <div className="text-xl font-bold text-gray-900">{summary.balance}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-gray-600">Расходы</div>
+                  <div className="text-xl font-bold text-gray-900">{summary.expenses}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-gray-600">В планах</div>
+                  <div className="text-xl font-bold text-gray-900">{summary.planned}</div>
+                </div>
+              </div>
+            </div>
 
             <div className="space-y-8">
               {sections.map((section) => (
-                <AccountSection
-                  key={section.id}
-                  section={section}
-                  isExpanded={expandedSections[section.id]}
-                  onToggle={() => toggleSection(section.id)}
-                  onContextMenu={handleContextMenu}
-                  onAccountClick={handleAccountClick}
-                  onCreateClick={handleCreateAccount}
-                  onDragStart={handleDragStart}
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
-                  onDragEnd={handleDragEnd}
-                  dropTarget={dropTarget}
-                  getColorClass={getColorClass}
-                />
+                <div key={section.id} className="bg-white rounded-xl shadow-lg overflow-hidden">
+                  <button
+                    onClick={() => toggleSection(section.id)}
+                    className="w-full px-6 py-4 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
+                  >
+                    <h2 className="text-lg font-semibold text-gray-900">{section.title}</h2>
+                    <span className="transform transition-transform duration-200">
+                      {expandedSections[section.id] ? '▼' : '▶'}
+                    </span>
+                  </button>
+                  
+                  {expandedSections[section.id] && (
+                    <div className="p-6">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {section.accounts.map((account) => (
+                          <div key={account.id} className="flex flex-col items-center">
+                            <div 
+                              className={`${getColorClass(account.color)} rounded-full p-6 mb-2 shadow-lg cursor-pointer ${
+                                dropTarget?.id === account.id ? 'ring-4 ring-primary-500' : ''
+                              }`}
+                              onClick={() => handleAccountClick(account)}
+                              onContextMenu={(e) => handleContextMenu(e, account.id, section.id)}
+                              draggable
+                              onDragStart={(e) => handleDragStart(e, account)}
+                              onDragOver={(e) => handleDragOver(e, account)}
+                              onDrop={(e) => handleDrop(e, account)}
+                              onDragEnd={handleDragEnd}
+                            >
+                              {account.icon}
+                            </div>
+                            <div className="text-center">
+                              <div className="font-medium text-gray-900 mb-1">{account.name}</div>
+                              <div className={`text-sm ${account.amount.includes('-') ? 'text-red-600' : 'text-gray-600'}`}>
+                                {account.amount}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        <button
+                          onClick={() => handleCreateAccount(section.id)}
+                          className="flex flex-col items-center justify-center"
+                        >
+                          <div className="bg-gray-200 rounded-full p-6 mb-2 shadow-lg hover:bg-gray-300 transition-colors">
+                            <svg className="h-8 w-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                          </div>
+                          <div className="font-medium text-gray-600">Добавить счет</div>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </div>
