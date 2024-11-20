@@ -9,8 +9,7 @@ import AccountDetailsModal from '../components/AccountDetailsModal';
 import AccountSection from '../components/AccountSection';
 import AccountSummary from '../components/AccountSummary';
 import { useAccounts } from '../hooks/useAccounts';
-import { AccountItem, Transaction } from '../types/accounting';
-import { IconType } from '../types/icons';
+import { AccountItem } from '../types/accounting';
 
 const summary = {
   balance: "135.2M ₸",
@@ -107,7 +106,7 @@ export default function AccountingPage() {
     });
   };
 
-  const handleSaveNewAccount = (name: string, iconType: IconType, color: 'blue' | 'yellow' | 'green' | 'purple', sectionId: string) => {
+  const handleSaveNewAccount = (name: string, iconType: string, color: 'blue' | 'yellow' | 'green' | 'purple', sectionId: string) => {
     const newId = Math.max(...sections.flatMap(s => s.accounts.map(a => a.id))) + 1;
     
     const newAccount: AccountItem = {
@@ -124,7 +123,7 @@ export default function AccountingPage() {
 
   const handleDragStart = (e: React.DragEvent, account: AccountItem) => {
     setDraggedAccount(account);
-    e.dataTransfer.setData('text/plain', '');
+    e.dataTransfer.setData('text/plain', ''); // Required for Firefox
   };
 
   const handleDragOver = (e: React.DragEvent, account: AccountItem) => {
@@ -153,8 +152,7 @@ export default function AccountingPage() {
 
   const handleSaveTransaction = (amount: number, description: string, date: string) => {
     if (transactionModal.fromAccount && transactionModal.toAccount) {
-      // Создаем транзакцию
-      const transaction: Transaction = {
+      const transaction = {
         id: Date.now(),
         fromAccountId: transactionModal.fromAccount.id,
         fromAccountName: transactionModal.fromAccount.name,
@@ -165,11 +163,11 @@ export default function AccountingPage() {
         date
       };
 
-      // Обновляем балансы счетов
+      // Обновляем баланс счетов
       updateAccountAmount(transactionModal.fromAccount.id, -amount);
       updateAccountAmount(transactionModal.toAccount.id, amount);
 
-      // Сохраняем транзакцию в localStorage для обоих счетов
+      // Сохраняем транзакцию в историю обоих счетов
       const fromStorageKey = `transactions_${transactionModal.fromAccount.id}`;
       const toStorageKey = `transactions_${transactionModal.toAccount.id}`;
 
@@ -183,17 +181,10 @@ export default function AccountingPage() {
   };
 
   const handleClearAllHistory = () => {
-    // Очищаем историю всех счетов
+    // Очищаем все транзакции
     sections.forEach(section => {
       section.accounts.forEach(account => {
         clearAccountHistory(account.id);
-      });
-    });
-
-    // Сбрасываем все балансы на 0
-    sections.forEach(section => {
-      section.accounts.forEach(account => {
-        updateAccount(account.id, { amount: "0 ₸" });
       });
     });
   };
@@ -226,10 +217,7 @@ export default function AccountingPage() {
               h1="Бухгалтерия компании"
             />
 
-            <AccountSummary 
-              summary={summary} 
-              onClearAll={handleClearAllHistory}
-            />
+            <AccountSummary summary={summary} onClearAll={handleClearAllHistory} />
 
             <div className="space-y-8">
               {sections.map((section) => (
