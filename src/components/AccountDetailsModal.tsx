@@ -1,6 +1,8 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { AccountItem, Transaction } from '../types/accounting';
+import { AccountItem } from '../types/accounting';
+import { useTransactions } from '../hooks/useTransactions';
+import AccountIcon from './AccountIcon';
 
 interface AccountDetailsModalProps {
   account: AccountItem;
@@ -8,7 +10,7 @@ interface AccountDetailsModalProps {
 }
 
 export default function AccountDetailsModal({ account, onClose }: AccountDetailsModalProps) {
-  const transactions = loadTransactions(account.id);
+  const { transactions } = useTransactions(account.id);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -19,7 +21,7 @@ export default function AccountDetailsModal({ account, onClose }: AccountDetails
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-4">
               <div className={`${getColorClass(account.color)} rounded-full p-4`}>
-                {account.icon}
+                <AccountIcon type={account.iconType} />
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-900">{account.name}</h3>
@@ -38,8 +40,8 @@ export default function AccountDetailsModal({ account, onClose }: AccountDetails
             
             {transactions.length > 0 ? (
               <div className="divide-y divide-gray-200">
-                {transactions.map((transaction, index) => (
-                  <div key={index} className="py-4">
+                {transactions.map((transaction) => (
+                  <div key={transaction.id} className="py-4">
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-medium text-gray-900">{transaction.description}</p>
@@ -58,7 +60,9 @@ export default function AccountDetailsModal({ account, onClose }: AccountDetails
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 text-center py-8">История операций пуста</p>
+              <div className="text-center py-8 bg-gray-50 rounded-lg">
+                <p className="text-gray-500">История операций пуста</p>
+              </div>
             )}
           </div>
         </div>
@@ -78,10 +82,4 @@ function getColorClass(color: string) {
     default:
       return 'bg-gray-500';
   }
-}
-
-function loadTransactions(accountId: number): Transaction[] {
-  const storageKey = `transactions_${accountId}`;
-  const savedTransactions = localStorage.getItem(storageKey);
-  return savedTransactions ? JSON.parse(savedTransactions) : [];
 }
