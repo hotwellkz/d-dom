@@ -32,10 +32,164 @@ interface AccountSection {
   accounts: AccountItem[];
 }
 
-// ... остальные интерфейсы и константы остаются без изменений ...
+const initialSections: AccountSection[] = [
+  {
+    id: 'personal',
+    title: 'Личные счета',
+    accounts: [
+      {
+        id: 1,
+        name: "Гульжемал",
+        amount: "3 609k ₸",
+        icon: <User className="h-8 w-8 text-white" />,
+        color: 'blue'
+      },
+      {
+        id: 2,
+        name: "Еркынгали",
+        amount: "75 000 ₸",
+        icon: <User className="h-8 w-8 text-white" />,
+        color: 'blue'
+      },
+      {
+        id: 3,
+        name: "Ольга",
+        amount: "4 275k ₸",
+        icon: <User className="h-8 w-8 text-white" />,
+        color: 'blue'
+      },
+      {
+        id: 4,
+        name: "Асхат/Куралай",
+        amount: "16 368k ₸",
+        icon: <User className="h-8 w-8 text-white" />,
+        color: 'blue'
+      }
+    ]
+  },
+  {
+    id: 'vehicles',
+    title: 'Транспорт и управление',
+    accounts: [
+      {
+        id: 5,
+        name: "Савицкий",
+        amount: "30 748.57 ₸",
+        icon: <Car className="h-8 w-8 text-white" />,
+        color: 'yellow'
+      },
+      {
+        id: 6,
+        name: "Саша",
+        amount: "- 195 486 ₸",
+        icon: <Car className="h-8 w-8 text-white" />,
+        color: 'yellow'
+      },
+      {
+        id: 7,
+        name: "Леонид",
+        amount: "2 729k ₸",
+        icon: <User className="h-8 w-8 text-white" />,
+        color: 'yellow'
+      },
+      {
+        id: 8,
+        name: "Милюк",
+        amount: "40 614k ₸",
+        icon: <Building2 className="h-8 w-8 text-white" />,
+        color: 'yellow'
+      }
+    ]
+  },
+  {
+    id: 'operations',
+    title: 'Операционные счета',
+    accounts: [
+      {
+        id: 9,
+        name: "Общ Расх",
+        amount: "38 910k ₸",
+        icon: <Calculator className="h-8 w-8 text-white" />,
+        color: 'green'
+      },
+      {
+        id: 10,
+        name: "Пеноп Клей OSB",
+        amount: "38 446k ₸",
+        icon: <Building2 className="h-8 w-8 text-white" />,
+        color: 'green'
+      },
+      {
+        id: 11,
+        name: "KK1",
+        amount: "1 512k ₸",
+        icon: <Home className="h-8 w-8 text-white" />,
+        color: 'green'
+      },
+      {
+        id: 12,
+        name: "KK2",
+        amount: "1 159k ₸",
+        icon: <Home className="h-8 w-8 text-white" />,
+        color: 'green'
+      }
+    ]
+  }
+];
+
+const summary = {
+  balance: "135.2M ₸",
+  expenses: "160.2M ₸",
+  planned: "0 ₸"
+};
 
 export default function AccountingPage() {
-  // ... существующие состояния ...
+  const [sections, setSections] = useState<AccountSection[]>(initialSections);
+  const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({
+    personal: true,
+    vehicles: true,
+    operations: true
+  });
+
+  const [contextMenu, setContextMenu] = useState<{
+    show: boolean;
+    x: number;
+    y: number;
+    accountId: number | null;
+    sectionId: string | null;
+  }>({
+    show: false,
+    x: 0,
+    y: 0,
+    accountId: null,
+    sectionId: null
+  });
+
+  const [editModal, setEditModal] = useState<{
+    show: boolean;
+    accountId: number | null;
+    currentName: string;
+  }>({
+    show: false,
+    accountId: null,
+    currentName: ''
+  });
+
+  const [createModal, setCreateModal] = useState<{
+    show: boolean;
+    sectionId: string | null;
+  }>({
+    show: false,
+    sectionId: null
+  });
+
+  const [detailsModal, setDetailsModal] = useState<{
+    show: boolean;
+    account: AccountItem | null;
+  }>({
+    show: false,
+    account: null
+  });
 
   const [draggedAccount, setDraggedAccount] = useState<AccountItem | null>(null);
   const [dropTarget, setDropTarget] = useState<AccountItem | null>(null);
@@ -49,11 +203,125 @@ export default function AccountingPage() {
     toAccount: null
   });
 
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionId]: !prev[sectionId]
+    }));
+  };
+
+  const handleContextMenu = (e: React.MouseEvent, accountId: number, sectionId: string) => {
+    e.preventDefault();
+    setContextMenu({
+      show: true,
+      x: e.clientX,
+      y: e.clientY,
+      accountId,
+      sectionId
+    });
+  };
+
+  const handleEditAccount = () => {
+    if (contextMenu.accountId) {
+      const account = sections
+        .flatMap(section => section.accounts)
+        .find(account => account.id === contextMenu.accountId);
+      
+      if (account) {
+        setEditModal({
+          show: true,
+          accountId: account.id,
+          currentName: account.name
+        });
+      }
+    }
+    setContextMenu(prev => ({ ...prev, show: false }));
+  };
+
+  const handleDeleteAccount = () => {
+    if (contextMenu.accountId && contextMenu.sectionId) {
+      setSections(prevSections =>
+        prevSections.map(section => {
+          if (section.id === contextMenu.sectionId) {
+            return {
+              ...section,
+              accounts: section.accounts.filter(account => account.id !== contextMenu.accountId)
+            };
+          }
+          return section;
+        })
+      );
+    }
+    setContextMenu(prev => ({ ...prev, show: false }));
+  };
+
+  const handleSaveEdit = (newName: string) => {
+    if (editModal.accountId) {
+      setSections(prevSections =>
+        prevSections.map(section => ({
+          ...section,
+          accounts: section.accounts.map(account =>
+            account.id === editModal.accountId
+              ? { ...account, name: newName }
+              : account
+          )
+        }))
+      );
+    }
+    setEditModal({ show: false, accountId: null, currentName: '' });
+  };
+
+  const handleCreateAccount = (name: string, iconType: string, color: 'blue' | 'yellow' | 'green', sectionId: string) => {
+    const newId = Math.max(...sections.flatMap(s => s.accounts.map(a => a.id))) + 1;
+    
+    const getIcon = () => {
+      switch (iconType) {
+        case 'user': return <User className="h-8 w-8 text-white" />;
+        case 'car': return <Car className="h-8 w-8 text-white" />;
+        case 'building': return <Building2 className="h-8 w-8 text-white" />;
+        case 'calculator': return <Calculator className="h-8 w-8 text-white" />;
+        case 'home': return <Home className="h-8 w-8 text-white" />;
+        case 'hammer': return <Hammer className="h-8 w-8 text-white" />;
+        default: return <User className="h-8 w-8 text-white" />;
+      }
+    };
+
+    const newAccount: AccountItem = {
+      id: newId,
+      name,
+      amount: "0 ₸",
+      icon: getIcon(),
+      color
+    };
+
+    setSections(prevSections =>
+      prevSections.map(section =>
+        section.id === sectionId
+          ? { ...section, accounts: [...section.accounts, newAccount] }
+          : section
+      )
+    );
+
+    setCreateModal({ show: false, sectionId: null });
+  };
+
+  const handleAccountClick = (account: AccountItem) => {
+    setDetailsModal({ show: true, account });
+  };
+
+  const getColorClass = (color: string) => {
+    switch (color) {
+      case 'blue': return 'bg-cyan-500';
+      case 'yellow': return 'bg-yellow-400';
+      case 'green': return 'bg-emerald-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
   const handleDragStart = (e: React.DragEvent, account: AccountItem) => {
     setDraggedAccount(account);
     e.dataTransfer.setData('text/plain', account.id.toString());
     
-    // Создаем превью для перетаскивания
     const dragIcon = document.createElement('div');
     dragIcon.className = `${getColorClass(account.color)} rounded-full p-6`;
     dragIcon.innerHTML = '<div class="h-8 w-8 text-white"></div>';
@@ -87,7 +355,6 @@ export default function AccountingPage() {
 
   const handleSaveTransaction = (amount: number, description: string, date: string) => {
     if (transactionModal.fromAccount && transactionModal.toAccount) {
-      // Обновляем баланс обоих счетов
       setSections(prevSections =>
         prevSections.map(section => ({
           ...section,
