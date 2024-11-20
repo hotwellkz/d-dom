@@ -14,69 +14,143 @@ interface AccountDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   account: {
+    id: number;
     name: string;
     amount: string;
   };
 }
 
-// Пример транзакций
-const transactions: Transaction[] = [
-  {
-    id: 1,
-    date: "20 ноября",
-    description: "Общ Расх",
-    amount: "- 190 146 ₸",
-    category: "налоги hotwell общ расх",
-  },
-  {
-    id: 2,
-    date: "20 ноября",
-    description: "Анна 114",
-    amount: "- 352 000 ₸",
-    category: "бетон",
-  },
-  {
-    id: 3,
-    date: "20 ноября",
-    description: "Общ Расх",
-    amount: "- 20 000 ₸",
-    category: "зп Андрей сайт",
-  },
-  {
-    id: 4,
-    date: "19 ноября",
-    description: "Саша",
-    amount: "+ 1 200k ₸",
-    category: "",
-  },
-  {
-    id: 5,
-    date: "19 ноября",
-    description: "ОльгаКайрат",
-    amount: "+ 4 200k ₸",
-    category: "надстройка 144 Ремизовка",
-  },
-  {
-    id: 6,
-    date: "19 ноября",
-    description: "ЕрнарАлуа",
-    amount: "+ 1 288k ₸",
-    category: "Шымбулак Модуль Б40",
-  },
-  {
-    id: 7,
-    date: "19 ноября",
-    description: "Пеноп Клей OSB",
-    amount: "- 508 539 ₸",
-    category: "пенопласт",
-  }
-];
+// База данных транзакций по аккаунтам
+const transactionsByAccount: { [key: number]: Transaction[] } = {
+  // Милюк
+  8: [
+    {
+      id: 1,
+      date: "20 ноября",
+      description: "Общ Расх",
+      amount: "- 190 146 ₸",
+      category: "налоги hotwell общ расх",
+    },
+    {
+      id: 2,
+      date: "20 ноября",
+      description: "Анна 114",
+      amount: "- 352 000 ₸",
+      category: "бетон",
+    },
+    {
+      id: 3,
+      date: "20 ноября",
+      description: "Общ Расх",
+      amount: "- 20 000 ₸",
+      category: "зп Андрей сайт",
+    }
+  ],
+  // Савицкий
+  5: [
+    {
+      id: 1,
+      date: "20 ноября",
+      description: "Общ Расх",
+      amount: "- 2 600 ₸",
+      category: "зимния омывайка 2шт спринтер 2",
+    },
+    {
+      id: 2,
+      date: "20 ноября",
+      description: "Общ Расх",
+      amount: "- 25 500 ₸",
+      category: "салафан бухта и фломастеры 2уп на склад",
+    },
+    {
+      id: 3,
+      date: "20 ноября",
+      description: "Общ Расх",
+      amount: "- 500 ₸",
+      category: "заезд",
+    },
+    {
+      id: 4,
+      date: "20 ноября",
+      description: "Общ Расх",
+      amount: "- 2 500 ₸",
+      category: "мойка спринт 2",
+    }
+  ],
+  // Саша
+  6: [
+    {
+      id: 1,
+      date: "20 ноября",
+      description: "Пансионат Талгар",
+      amount: "- 16 100 ₸",
+      category: "проволока, арматура",
+    },
+    {
+      id: 2,
+      date: "20 ноября",
+      description: "Общ Расх",
+      amount: "- 500 ₸",
+      category: "заезд",
+    }
+  ],
+  // Гульжемал
+  1: [
+    {
+      id: 1,
+      date: "19 ноября",
+      description: "65кв.м",
+      amount: "+ 3 534k ₸",
+      category: "Оплата за проект",
+    }
+  ],
+  // Асхат/Куралай
+  4: [
+    {
+      id: 1,
+      date: "19 ноября",
+      description: "Кегень",
+      amount: "+ 16 368k ₸",
+      category: "Оплата за проект",
+    }
+  ],
+  // Общ Расх
+  9: [
+    {
+      id: 1,
+      date: "20 ноября",
+      description: "Милюк",
+      amount: "- 190 146 ₸",
+      category: "налоги hotwell общ расх",
+    },
+    {
+      id: 2,
+      date: "20 ноября",
+      description: "Савицкий",
+      amount: "- 2 600 ₸",
+      category: "зимния омывайка 2шт спринтер 2",
+    }
+  ],
+  // Пеноп Клей OSB
+  10: [
+    {
+      id: 1,
+      date: "19 ноября",
+      description: "Милюк",
+      amount: "- 508 539 ₸",
+      category: "пенопласт",
+    }
+  ]
+};
 
 export default function AccountDetailsModal({ isOpen, onClose, account }: AccountDetailsModalProps) {
   if (!isOpen) return null;
 
-  // Group transactions by date
-  const groupedTransactions = transactions.reduce((groups, transaction) => {
+  // Получаем транзакции для текущего аккаунта
+  const accountTransactions = transactionsByAccount[account.id] || [];
+
+  // Группируем транзакции по дате
+  const groupedTransactions = accountTransactions.reduce((groups, transaction) => {
     const date = transaction.date;
     if (!groups[date]) {
       groups[date] = [];
@@ -132,6 +206,12 @@ export default function AccountDetailsModal({ isOpen, onClose, account }: Accoun
                 </div>
               </div>
             ))}
+
+            {accountTransactions.length === 0 && (
+              <div className="px-6 py-12 text-center text-gray-500">
+                Нет транзакций для отображения
+              </div>
+            )}
           </div>
         </div>
       </div>
