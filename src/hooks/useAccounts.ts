@@ -15,7 +15,8 @@ export function useAccounts() {
   const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({
     clients: true,
     personal: true,
-    objects: true
+    objects: true,
+    warehouse: true
   });
 
   // Сохраняем данные в localStorage при каждом изменении
