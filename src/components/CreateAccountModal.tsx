@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { X, User, Car, Building2, Calculator, Home, Hammer } from 'lucide-react';
+import { IconType } from '../types/icons';
 
 interface CreateAccountModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (name: string, icon: string, color: 'blue' | 'yellow' | 'green', sectionId: string) => void;
+  onSave: (name: string, iconType: IconType, color: 'blue' | 'yellow' | 'green', sectionId: string) => void;
   sectionId: string;
 }
 
-const icons = [
+const icons: { id: IconType; icon: React.ReactNode; label: string }[] = [
   { id: 'user', icon: <User className="h-6 w-6 text-white" />, label: 'Пользователь' },
   { id: 'car', icon: <Car className="h-6 w-6 text-white" />, label: 'Транспорт' },
   { id: 'building', icon: <Building2 className="h-6 w-6 text-white" />, label: 'Здание' },
@@ -21,11 +22,11 @@ const colors = [
   { id: 'blue', label: 'Синий', class: 'bg-cyan-500' },
   { id: 'yellow', label: 'Желтый', class: 'bg-yellow-400' },
   { id: 'green', label: 'Зеленый', class: 'bg-emerald-500' }
-];
+] as const;
 
 export default function CreateAccountModal({ isOpen, onClose, onSave, sectionId }: CreateAccountModalProps) {
   const [name, setName] = useState('');
-  const [selectedIcon, setSelectedIcon] = useState('user');
+  const [selectedIcon, setSelectedIcon] = useState<IconType>('user');
   const [selectedColor, setSelectedColor] = useState<'blue' | 'yellow' | 'green'>('blue');
 
   if (!isOpen) return null;
@@ -103,7 +104,7 @@ export default function CreateAccountModal({ isOpen, onClose, onSave, sectionId 
                   <button
                     key={color.id}
                     type="button"
-                    onClick={() => setSelectedColor(color.id as 'blue' | 'yellow' | 'green')}
+                    onClick={() => setSelectedColor(color.id)}
                     className={`p-3 rounded-lg flex items-center justify-center ${
                       selectedColor === color.id 
                         ? 'ring-2 ring-primary-500' 
