@@ -7,9 +7,8 @@ import {
   deleteDoc,
   query,
   where,
-  Timestamp,
-  DocumentData,
-  serverTimestamp
+  serverTimestamp,
+  DocumentData
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { AccountItem } from '../types/accounting';
@@ -46,7 +45,7 @@ export async function createAccount(account: Omit<AccountItem, 'id'> & { section
     const docRef = await addDoc(accountsCollection, {
       ...account,
       createdAt: serverTimestamp(),
-      amount: "0 ₸" // Устанавливаем начальную сумму
+      amount: "0 ₸"
     });
     return docRef.id;
   } catch (error) {
@@ -70,15 +69,11 @@ export async function updateAccount(id: string, updates: Partial<AccountItem>) {
 
 export async function deleteAccount(id: string) {
   try {
-    // Удаляем аккаунт
     const docRef = doc(accountsCollection, id);
     await deleteDoc(docRef);
     
     // Удаляем связанные транзакции
-    const q = query(
-      transactionsCollection,
-      where('fromAccountId', '==', id)
-    );
+    const q = query(transactionsCollection, where('fromAccountId', '==', id));
     const snapshot = await getDocs(q);
     await Promise.all(snapshot.docs.map(doc => deleteDoc(doc.ref)));
   } catch (error) {
@@ -90,10 +85,7 @@ export async function deleteAccount(id: string) {
 // Операции с транзакциями
 export async function getAccountTransactions(accountId: string) {
   try {
-    const q = query(
-      transactionsCollection,
-      where('fromAccountId', '==', accountId)
-    );
+    const q = query(transactionsCollection, where('fromAccountId', '==', accountId));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({
       id: doc.id,
@@ -120,10 +112,7 @@ export async function createTransaction(transaction: any) {
 
 export async function clearAccountTransactions(accountId: string) {
   try {
-    const q = query(
-      transactionsCollection,
-      where('fromAccountId', '==', accountId)
-    );
+    const q = query(transactionsCollection, where('fromAccountId', '==', accountId));
     const snapshot = await getDocs(q);
     await Promise.all(snapshot.docs.map(doc => deleteDoc(doc.ref)));
   } catch (error) {
