@@ -35,7 +35,7 @@ export function useAccounts() {
       setIsLoading(true);
       const snapshot = await getDocs(accountsCollection);
       const accounts = snapshot.docs.map(doc => ({
-        id: parseInt(doc.id),
+        id: doc.id,
         ...doc.data()
       }));
       
@@ -59,7 +59,10 @@ export function useAccounts() {
           ...section,
           accounts: accounts
             .filter(account => account.sectionId === section.id)
-            .map(({ sectionId, ...account }) => account as AccountItem)
+            .map(({ sectionId, ...account }) => ({
+              ...account,
+              id: account.id
+            } as AccountItem))
         }));
         setSections(updatedSections);
       }
@@ -77,13 +80,14 @@ export function useAccounts() {
     }));
   };
 
-  const updateAccount = async (accountId: number, updates: Partial<AccountItem>) => {
+  const updateAccount = async (accountId: string, updates: Partial<AccountItem>) => {
     try {
-      const docRef = doc(accountsCollection, accountId.toString());
+      const docRef = doc(accountsCollection, accountId);
       await updateDoc(docRef, {
         ...updates,
         updatedAt: serverTimestamp()
       });
+      
       setSections(prevSections =>
         prevSections.map(section => ({
           ...section,
@@ -100,10 +104,11 @@ export function useAccounts() {
     }
   };
 
-  const deleteAccount = async (accountId: number, sectionId: string) => {
+  const deleteAccount = async (accountId: string, sectionId: string) => {
     try {
-      const docRef = doc(accountsCollection, accountId.toString());
+      const docRef = doc(accountsCollection, accountId);
       await deleteDoc(docRef);
+
       setSections(prevSections =>
         prevSections.map(section => {
           if (section.id === sectionId) {
@@ -126,14 +131,16 @@ export function useAccounts() {
       const docRef = await addDoc(accountsCollection, {
         ...newAccount,
         sectionId,
+        amount: "0 ₸",
         createdAt: serverTimestamp()
       });
+
       setSections(prevSections =>
         prevSections.map(section =>
           section.id === sectionId
             ? { 
                 ...section, 
-                accounts: [...section.accounts, { ...newAccount, id: parseInt(docRef.id) }] 
+                accounts: [...section.accounts, { ...newAccount, id: docRef.id }] 
               }
             : section
         )
@@ -145,7 +152,7 @@ export function useAccounts() {
     }
   };
 
-  const updateAccountAmount = async (accountId: number, amount: number) => {
+  const updateAccountAmount = async (accountId: string, amount: number) => {
     try {
       const account = sections
         .flatMap(s => s.accounts)
@@ -162,9 +169,9 @@ export function useAccounts() {
     }
   };
 
-  const clearAccountHistory = async (accountId: number) => {
+  const clearAccountHistory = async (accountId: string) => {
     try {
-      const q = query(collection(db, 'transactions'), where('fromAccountId', '==', accountId.toString()));
+      const q = query(collection(db, 'transactions'), where('fromAccountId', '==', accountId));
       const snapshot = await getDocs(q);
       await Promise.all(snapshot.docs.map(doc => deleteDoc(doc.ref)));
       await updateAccount(accountId, { amount: "0 ₸" });
