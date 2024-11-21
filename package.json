@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "firebase:emulators": "firebase emulators:start"
   },
   "dependencies": {
     "@types/react-transition-group": "^4.4.10",
@@ -15,6 +16,8 @@
     "dotenv": "^16.4.5",
     "express": "^4.18.2",
     "firebase": "^10.7.0",
+    "firebase-admin": "^11.11.1",
+    "firebase-functions": "^4.5.0",
     "framer-motion": "^11.0.8",
     "lucide-react": "^0.344.0",
     "node-telegram-bot-api": "^0.64.0",
@@ -37,6 +40,7 @@
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "firebase-tools": "^13.0.2",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.2.2",
