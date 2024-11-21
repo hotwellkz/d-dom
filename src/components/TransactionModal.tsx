@@ -23,39 +23,55 @@ export default function TransactionModal({
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
+  const validateAmount = (value: string) => {
+    const num = parseFloat(value.replace(/[^0-9.-]+/g, ''));
+    return !isNaN(num) && num > 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
+    if (!validateAmount(amount)) {
+      setError('Пожалуйста, введите корректную сумму');
+      return;
+    }
+
+    if (!description.trim()) {
+      setError('Пожалуйста, введите описание');
+      return;
+    }
+
     const numAmount = parseFloat(amount.replace(/[^0-9.-]+/g, ''));
     
-    if (!isNaN(numAmount) && description.trim()) {
-      setIsSubmitting(true);
-      try {
-        // Save transaction to Firestore
-        const transactionsRef = collection(db, 'transactions');
-        await addDoc(transactionsRef, {
-          fromAccountId: fromAccount.id.toString(),
-          fromAccountName: fromAccount.name,
-          toAccountId: toAccount.id.toString(),
-          toAccountName: toAccount.name,
-          amount: numAmount,
-          description: description.trim(),
-          date,
-          createdAt: serverTimestamp()
-        });
+    setIsSubmitting(true);
+    try {
+      // Save transaction to Firestore
+      const transactionsRef = collection(db, 'transactions');
+      await addDoc(transactionsRef, {
+        fromAccountId: fromAccount.id.toString(),
+        fromAccountName: fromAccount.name,
+        toAccountId: toAccount.id.toString(),
+        toAccountName: toAccount.name,
+        amount: numAmount,
+        description: description.trim(),
+        date,
+        createdAt: serverTimestamp()
+      });
 
-        onSave(numAmount, description.trim(), date);
-        setAmount('');
-        setDescription('');
-        onClose();
-      } catch (error) {
-        console.error('Error saving transaction:', error);
-        alert('Ошибка при сохранении транзакции');
-      } finally {
-        setIsSubmitting(false);
-      }
+      onSave(numAmount, description.trim(), date);
+      setAmount('');
+      setDescription('');
+      onClose();
+    } catch (error) {
+      console.error('Error saving transaction:', error);
+      setError('Ошибка при сохранении транзакции. Пожалуйста, попробуйте снова.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -73,6 +89,12 @@ export default function TransactionModal({
               <X className="h-6 w-6" />
             </button>
           </div>
+
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="flex items-center justify-between text-sm text-gray-500">
@@ -131,14 +153,14 @@ export default function TransactionModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg disabled:opacity-50"
                 disabled={isSubmitting}
               >
                 Отмена
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Сохранение...' : 'Перевести'}
