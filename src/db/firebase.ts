@@ -2,17 +2,17 @@ import {
   collection, 
   doc,
   getDocs,
-  getDoc,
   addDoc,
   updateDoc,
   deleteDoc,
   query,
   where,
   Timestamp,
-  DocumentData
+  DocumentData,
+  serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { AccountItem, Transaction } from '../types/accounting';
+import { AccountItem } from '../types/accounting';
 
 // Коллекции
 const accountsCollection = collection(db, 'accounts');
@@ -45,7 +45,8 @@ export async function createAccount(account: Omit<AccountItem, 'id'> & { section
   try {
     const docRef = await addDoc(accountsCollection, {
       ...account,
-      createdAt: Timestamp.now()
+      createdAt: serverTimestamp(),
+      amount: "0 ₸" // Устанавливаем начальную сумму
     });
     return docRef.id;
   } catch (error) {
@@ -59,7 +60,7 @@ export async function updateAccount(id: string, updates: Partial<AccountItem>) {
     const docRef = doc(accountsCollection, id);
     await updateDoc(docRef, {
       ...updates,
-      updatedAt: Timestamp.now()
+      updatedAt: serverTimestamp()
     });
   } catch (error) {
     console.error('Error updating account:', error);
@@ -69,6 +70,7 @@ export async function updateAccount(id: string, updates: Partial<AccountItem>) {
 
 export async function deleteAccount(id: string) {
   try {
+    // Удаляем аккаунт
     const docRef = doc(accountsCollection, id);
     await deleteDoc(docRef);
     
@@ -78,9 +80,7 @@ export async function deleteAccount(id: string) {
       where('fromAccountId', '==', id)
     );
     const snapshot = await getDocs(q);
-    snapshot.docs.forEach(async (doc) => {
-      await deleteDoc(doc.ref);
-    });
+    await Promise.all(snapshot.docs.map(doc => deleteDoc(doc.ref)));
   } catch (error) {
     console.error('Error deleting account:', error);
     throw error;
@@ -98,18 +98,18 @@ export async function getAccountTransactions(accountId: string) {
     return snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
-    })) as Transaction[];
+    }));
   } catch (error) {
     console.error('Error getting transactions:', error);
     throw error;
   }
 }
 
-export async function createTransaction(transaction: Omit<Transaction, 'id'>) {
+export async function createTransaction(transaction: any) {
   try {
     const docRef = await addDoc(transactionsCollection, {
       ...transaction,
-      createdAt: Timestamp.now()
+      createdAt: serverTimestamp()
     });
     return docRef.id;
   } catch (error) {
