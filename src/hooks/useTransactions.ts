@@ -1,27 +1,48 @@
 import { useState, useEffect } from 'react';
 import { Transaction } from '../types/accounting';
 
-const STORAGE_KEY_PREFIX = 'transactions_';
+const API_URL = 'http://localhost:3001/api';
 
 export function useTransactions(accountId: number) {
-  const storageKey = `${STORAGE_KEY_PREFIX}${accountId}`;
-  
-  const [transactions, setTransactions] = useState<Transaction[]>(() => {
-    const savedTransactions = localStorage.getItem(storageKey);
-    return savedTransactions ? JSON.parse(savedTransactions) : [];
-  });
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(transactions));
-  }, [transactions, storageKey]);
+    fetchTransactions();
+  }, [accountId]);
 
-  const addTransaction = (transaction: Transaction) => {
-    setTransactions(prev => [...prev, transaction]);
+  const fetchTransactions = async () => {
+    try {
+      const response = await fetch(`${API_URL}/transactions/${accountId}`);
+      const data = await response.json();
+      setTransactions(data);
+    } catch (error) {
+      console.error('Failed to fetch transactions:', error);
+    }
   };
 
-  const clearTransactions = () => {
-    setTransactions([]);
-    localStorage.removeItem(storageKey);
+  const addTransaction = async (transaction: Omit<Transaction, 'id'>) => {
+    try {
+      const response = await fetch(`${API_URL}/transactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(transaction)
+      });
+      const { id } = await response.json();
+      setTransactions(prev => [...prev, { ...transaction, id }]);
+    } catch (error) {
+      console.error('Failed to add transaction:', error);
+    }
+  };
+
+  const clearTransactions = async () => {
+    try {
+      await fetch(`${API_URL}/transactions/${accountId}`, {
+        method: 'DELETE'
+      });
+      setTransactions([]);
+    } catch (error) {
+      console.error('Failed to clear transactions:', error);
+    }
   };
 
   return {
