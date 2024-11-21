@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X, Calendar } from 'lucide-react';
 import { AccountItem } from '../types/accounting';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { db } from '../config/firebase';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -20,17 +22,40 @@ export default function TransactionModal({
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const numAmount = parseFloat(amount.replace(/[^0-9.-]+/g, ''));
+    
     if (!isNaN(numAmount) && description.trim()) {
-      onSave(numAmount, description.trim(), date);
-      setAmount('');
-      setDescription('');
-      onClose();
+      setIsSubmitting(true);
+      try {
+        // Save transaction to Firestore
+        const transactionsRef = collection(db, 'transactions');
+        await addDoc(transactionsRef, {
+          fromAccountId: fromAccount.id.toString(),
+          fromAccountName: fromAccount.name,
+          toAccountId: toAccount.id.toString(),
+          toAccountName: toAccount.name,
+          amount: numAmount,
+          description: description.trim(),
+          date,
+          createdAt: serverTimestamp()
+        });
+
+        onSave(numAmount, description.trim(), date);
+        setAmount('');
+        setDescription('');
+        onClose();
+      } catch (error) {
+        console.error('Error saving transaction:', error);
+        alert('Ошибка при сохранении транзакции');
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -66,6 +91,7 @@ export default function TransactionModal({
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 placeholder="Введите сумму"
                 required
+                disabled={isSubmitting}
               />
             </div>
 
@@ -80,6 +106,7 @@ export default function TransactionModal({
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 placeholder="За что"
                 required
+                disabled={isSubmitting}
               />
             </div>
 
@@ -94,6 +121,7 @@ export default function TransactionModal({
                   onChange={(e) => setDate(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   required
+                  disabled={isSubmitting}
                 />
                 <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
               </div>
@@ -104,14 +132,16 @@ export default function TransactionModal({
                 type="button"
                 onClick={onClose}
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+                disabled={isSubmitting}
               >
                 Отмена
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                disabled={isSubmitting}
               >
-                Перевести
+                {isSubmitting ? 'Сохранение...' : 'Перевести'}
               </button>
             </div>
           </form>
