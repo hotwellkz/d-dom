@@ -6,8 +6,10 @@ import {
   query,
   where,
   getDocs,
+  deleteDoc,
   serverTimestamp,
-  orderBy
+  orderBy,
+  doc
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
@@ -33,7 +35,7 @@ export function useTransactions(accountId: number) {
       );
       const snapshot = await getDocs(q);
       const transactionData = snapshot.docs.map(doc => ({
-        id: parseInt(doc.id),
+        id: doc.id,
         ...doc.data()
       })) as Transaction[];
       setTransactions(transactionData);
@@ -48,14 +50,16 @@ export function useTransactions(accountId: number) {
     try {
       const docRef = await addDoc(transactionsCollection, {
         ...transaction,
+        fromAccountId: transaction.fromAccountId.toString(),
+        toAccountId: transaction.toAccountId.toString(),
         createdAt: serverTimestamp()
       });
-      
+
       const newTransaction = {
-        id: parseInt(docRef.id),
+        id: docRef.id,
         ...transaction
       };
-      
+
       setTransactions(prev => [newTransaction, ...prev]);
       return docRef.id;
     } catch (error) {
@@ -71,7 +75,7 @@ export function useTransactions(accountId: number) {
         where('fromAccountId', '==', accountId.toString())
       );
       const snapshot = await getDocs(q);
-      await Promise.all(snapshot.docs.map(doc => doc.delete()));
+      await Promise.all(snapshot.docs.map(doc => deleteDoc(doc.ref)));
       setTransactions([]);
     } catch (error) {
       console.error('Failed to clear transactions:', error);
