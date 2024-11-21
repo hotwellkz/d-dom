@@ -2,12 +2,20 @@ import { useState, useEffect } from 'react';
 import { AccountSection, AccountItem } from '../types/accounting';
 import { initialSections } from '../data/initialAccounts';
 import { 
-  getAllAccounts, 
-  createAccount as dbCreateAccount,
-  updateAccount as dbUpdateAccount,
-  deleteAccount as dbDeleteAccount,
-  clearAccountTransactions
-} from '../db/firebase';
+  collection,
+  doc,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  serverTimestamp
+} from 'firebase/firestore';
+import { db } from '../config/firebase';
+
+const accountsCollection = collection(db, 'accounts');
+const transactionsCollection = collection(db, 'transactions');
 
 export function useAccounts() {
   const [sections, setSections] = useState<AccountSection[]>(initialSections);
@@ -26,14 +34,22 @@ export function useAccounts() {
   const loadAccounts = async () => {
     try {
       setIsLoading(true);
-      const accounts = await getAllAccounts();
+      const snapshot = await getDocs(accountsCollection);
+      const accounts = snapshot.docs.map(doc => ({
+        id: parseInt(doc.id),
+        ...doc.data()
+      }));
       
       if (accounts.length === 0) {
         // Инициализируем базу данных начальными значениями
         await Promise.all(
           initialSections.flatMap(section =>
             section.accounts.map(account =>
-              dbCreateAccount({ ...account, sectionId: section.id })
+              addDoc(accountsCollection, {
+                ...account,
+                sectionId: section.id,
+                createdAt: serverTimestamp()
+              })
             )
           )
         );
@@ -64,7 +80,11 @@ export function useAccounts() {
 
   const updateAccount = async (accountId: number, updates: Partial<AccountItem>) => {
     try {
-      await dbUpdateAccount(accountId.toString(), updates);
+      const docRef = doc(accountsCollection, accountId.toString());
+      await updateDoc(docRef, {
+        ...updates,
+        updatedAt: serverTimestamp()
+      });
       setSections(prevSections =>
         prevSections.map(section => ({
           ...section,
@@ -83,7 +103,14 @@ export function useAccounts() {
 
   const deleteAccount = async (accountId: number, sectionId: string) => {
     try {
-      await dbDeleteAccount(accountId.toString());
+      const docRef = doc(accountsCollection, accountId.toString());
+      await deleteDoc(docRef);
+      
+      // Удаляем связанные транзакции
+      const q = query(transactionsCollection, where('fromAccountId', '==', accountId.toString()));
+      const snapshot = await getDocs(q);
+      await Promise.all(snapshot.docs.map(doc => deleteDoc(doc.ref)));
+      
       setSections(prevSections =>
         prevSections.map(section => {
           if (section.id === sectionId) {
@@ -103,13 +130,18 @@ export function useAccounts() {
 
   const addAccount = async (sectionId: string, newAccount: Omit<AccountItem, 'id'>) => {
     try {
-      const id = await dbCreateAccount({ ...newAccount, sectionId });
+      const docRef = await addDoc(accountsCollection, {
+        ...newAccount,
+        sectionId,
+        createdAt: serverTimestamp()
+      });
+      
       setSections(prevSections =>
         prevSections.map(section =>
           section.id === sectionId
             ? { 
                 ...section, 
-                accounts: [...section.accounts, { ...newAccount, id: parseInt(id) }] 
+                accounts: [...section.accounts, { ...newAccount, id: parseInt(docRef.id) }] 
               }
             : section
         )
@@ -139,7 +171,9 @@ export function useAccounts() {
 
   const clearAccountHistory = async (accountId: number) => {
     try {
-      await clearAccountTransactions(accountId.toString());
+      const q = query(transactionsCollection, where('fromAccountId', '==', accountId.toString()));
+      const snapshot = await getDocs(q);
+      await Promise.all(snapshot.docs.map(doc => deleteDoc(doc.ref)));
       await updateAccount(accountId, { amount: "0 ₸" });
     } catch (error) {
       console.error('Failed to clear account history:', error);
