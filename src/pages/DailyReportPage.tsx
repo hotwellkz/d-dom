@@ -1,48 +1,64 @@
 import React from 'react';
 import SEO from '../components/SEO';
 import AccountingSidebar from '../components/AccountingSidebar';
-import { useAccounts } from '../hooks/useAccounts';
-import { useTransactions } from '../hooks/useTransactions';
+import { Transaction } from '../types/accounting';
+
+function getAllTransactions(): Transaction[] {
+  // Получаем все ключи из localStorage, которые начинаются с 'transactions_'
+  const keys = Object.keys(localStorage).filter(key => key.startsWith('transactions_'));
+  
+  // Собираем все транзакции из всех счетов
+  const allTransactions = keys.reduce((acc: Transaction[], key) => {
+    const transactions = JSON.parse(localStorage.getItem(key) || '[]');
+    return [...acc, ...transactions];
+  }, []);
+
+  // Сортируем по дате (самые новые сверху)
+  return allTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
+interface DailySummary {
+  totalAmount: number;
+  income: number;
+  expenses: number;
+  transactions: Transaction[];
+}
 
 export default function DailyReportPage() {
-  const { sections } = useAccounts();
-  const allTransactions = sections.flatMap(section => 
-    section.accounts.flatMap(account => {
-      const { transactions } = useTransactions(account.id);
-      return transactions.map(t => ({
-        ...t,
-        accountName: account.name
-      }));
-    })
-  );
+  const transactions = getAllTransactions();
 
-  // Группируем транзакции по датам
-  const groupedTransactions = allTransactions.reduce((groups, transaction) => {
+  // Группируем транзакции по дням и считаем итоги
+  const dailyReports = transactions.reduce((acc: Record<string, DailySummary>, transaction) => {
     const date = new Date(transaction.date).toLocaleDateString('ru-RU');
-    if (!groups[date]) {
-      groups[date] = {
-        transactions: [],
-        totalIncome: 0,
-        totalExpense: 0
+    
+    if (!acc[date]) {
+      acc[date] = {
+        totalAmount: 0,
+        income: 0,
+        expenses: 0,
+        transactions: []
       };
     }
-    groups[date].transactions.push(transaction);
-    if (transaction.amount > 0) {
-      groups[date].totalIncome += transaction.amount;
+
+    // Добавляем транзакцию в список
+    acc[date].transactions.push(transaction);
+
+    // Обновляем суммы
+    const amount = transaction.amount;
+    acc[date].totalAmount += amount;
+    if (amount > 0) {
+      acc[date].income += amount;
     } else {
-      groups[date].totalExpense += Math.abs(transaction.amount);
+      acc[date].expenses += Math.abs(amount);
     }
-    return groups;
-  }, {} as Record<string, { 
-    transactions: typeof allTransactions, 
-    totalIncome: number, 
-    totalExpense: number 
-  }>);
+
+    return acc;
+  }, {});
 
   return (
     <div className="min-h-screen">
       <AccountingSidebar />
-      <div className="pl-0 md:pl-64 transition-all duration-300">
+      <div className="pl-64">
         <div className="pt-20">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <SEO 
@@ -52,59 +68,85 @@ export default function DailyReportPage() {
               h1="Отчет по дням"
             />
 
-            <div className="space-y-8">
-              {Object.entries(groupedTransactions)
-                .sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
-                .map(([date, data]) => (
-                  <div key={date} className="bg-white rounded-xl shadow-lg overflow-hidden">
-                    <div className="p-6 border-b border-gray-200">
-                      <h2 className="text-xl font-semibold text-gray-900">
+            <div className="space-y-6">
+              {Object.entries(dailyReports).map(([date, summary]) => (
+                <div key={date} className="bg-white rounded-xl shadow-lg overflow-hidden">
+                  {/* Дата и итоги дня */}
+                  <div className="p-6 bg-gray-50 border-b border-gray-200">
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-xl font-bold text-gray-900">
                         {new Date(date).toLocaleDateString('ru-RU', {
                           weekday: 'long',
                           day: 'numeric',
-                          month: 'long'
+                          month: 'long',
+                          year: 'numeric'
                         })}
                       </h2>
                     </div>
-
-                    <div className="divide-y divide-gray-200">
-                      {data.transactions.map((transaction) => (
-                        <div key={transaction.id} className="p-6 hover:bg-gray-50 transition-colors">
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <h3 className="font-medium text-gray-900">
-                                {transaction.fromAccountName} → {transaction.toAccountName}
-                              </h3>
-                              <p className="text-sm text-gray-500">{transaction.description}</p>
-                            </div>
-                            <div className={`text-lg font-semibold ${
-                              transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
-                            }`}>
-                              {transaction.amount > 0 ? '+' : '-'} {Math.abs(transaction.amount).toLocaleString()} ₸
-                            </div>
-                          </div>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center">
+                        <div className="text-sm text-gray-600">Итого за день</div>
+                        <div className={`text-lg font-bold ${
+                          summary.totalAmount >= 0 ? 'text-emerald-600' : 'text-red-600'
+                        }`}>
+                          {summary.totalAmount.toLocaleString()} ₸
                         </div>
-                      ))}
-                    </div>
-
-                    <div className="p-6 bg-gray-50">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-sm text-gray-500">Доходы</p>
-                          <p className="text-lg font-semibold text-green-600">
-                            + {data.totalIncome.toLocaleString()} ₸
-                          </p>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm text-gray-600">Приход</div>
+                        <div className="text-lg font-bold text-emerald-600">
+                          +{summary.income.toLocaleString()} ₸
                         </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Расходы</p>
-                          <p className="text-lg font-semibold text-red-600">
-                            - {data.totalExpense.toLocaleString()} ₸
-                          </p>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm text-gray-600">Расход</div>
+                        <div className="text-lg font-bold text-red-600">
+                          -{summary.expenses.toLocaleString()} ₸
                         </div>
                       </div>
                     </div>
                   </div>
-                ))}
+
+                  {/* Список транзакций */}
+                  <div className="divide-y divide-gray-200">
+                    {summary.transactions.map((transaction) => (
+                      <div key={transaction.id} className="p-6 hover:bg-gray-50 transition-colors">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-medium text-gray-900">
+                                {transaction.fromAccountName}
+                              </h3>
+                              <span className="text-gray-500">→</span>
+                              <h3 className="font-medium text-gray-900">
+                                {transaction.toAccountName}
+                              </h3>
+                            </div>
+                            <p className="text-sm text-gray-500 mt-1">
+                              {transaction.description}
+                            </p>
+                          </div>
+                          <div className="text-lg font-semibold text-red-600">
+                            {transaction.amount.toLocaleString()} ₸
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-500">
+                          {new Date(transaction.date).toLocaleTimeString('ru-RU', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+
+              {Object.keys(dailyReports).length === 0 && (
+                <div className="bg-white rounded-xl shadow-lg p-8 text-center text-gray-500">
+                  История операций пуста
+                </div>
+              )}
             </div>
           </div>
         </div>
