@@ -8,14 +8,13 @@ import {
   getDocs,
   deleteDoc,
   serverTimestamp,
-  orderBy,
-  doc
+  orderBy
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
 const transactionsCollection = collection(db, 'transactions');
 
-export function useTransactions(accountId: number) {
+export function useTransactions(accountId: string) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -30,7 +29,7 @@ export function useTransactions(accountId: number) {
       setIsLoading(true);
       const q = query(
         transactionsCollection,
-        where('fromAccountId', '==', accountId.toString()),
+        where('fromAccountId', '==', accountId),
         orderBy('createdAt', 'desc')
       );
       const snapshot = await getDocs(q);
@@ -50,8 +49,6 @@ export function useTransactions(accountId: number) {
     try {
       const docRef = await addDoc(transactionsCollection, {
         ...transaction,
-        fromAccountId: transaction.fromAccountId.toString(),
-        toAccountId: transaction.toAccountId.toString(),
         createdAt: serverTimestamp()
       });
 
@@ -72,7 +69,7 @@ export function useTransactions(accountId: number) {
     try {
       const q = query(
         transactionsCollection,
-        where('fromAccountId', '==', accountId.toString())
+        where('fromAccountId', '==', accountId)
       );
       const snapshot = await getDocs(q);
       await Promise.all(snapshot.docs.map(doc => deleteDoc(doc.ref)));
