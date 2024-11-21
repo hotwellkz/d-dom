@@ -15,7 +15,7 @@ export interface AccountSection {
 }
 
 export interface Transaction {
-  id: number;
+  id: string;
   fromAccountId: number;
   fromAccountName: string;
   toAccountId: number;
@@ -23,6 +23,7 @@ export interface Transaction {
   amount: number;
   description: string;
   date: string;
+  createdAt?: any;
 }
 
 export interface AccountSummary {
