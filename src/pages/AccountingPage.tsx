@@ -98,6 +98,20 @@ export default function AccountingPage() {
     setContextMenu(prev => ({ ...prev, show: false }));
   };
 
+  const handleDeleteAccount = async () => {
+    if (contextMenu.accountId && contextMenu.sectionId) {
+      await deleteAccount(contextMenu.accountId, contextMenu.sectionId);
+    }
+    setContextMenu(prev => ({ ...prev, show: false }));
+  };
+
+  const handleClearHistory = async () => {
+    if (contextMenu.accountId) {
+      await clearAccountHistory(contextMenu.accountId);
+    }
+    setContextMenu(prev => ({ ...prev, show: false }));
+  };
+
   const handleAccountClick = (account: AccountItem) => {
     setSelectedAccount(account);
   };
@@ -110,15 +124,20 @@ export default function AccountingPage() {
   };
 
   const handleSaveNewAccount = async (name: string, iconType: string, color: 'blue' | 'yellow' | 'green' | 'purple', sectionId: string) => {
-    const newAccount: Omit<AccountItem, 'id'> = {
-      name,
-      amount: "0 ₸",
-      iconType,
-      color
-    };
+    try {
+      const newAccount: Omit<AccountItem, 'id'> = {
+        name,
+        amount: "0 ₸",
+        iconType,
+        color
+      };
 
-    await addAccount(sectionId, newAccount);
-    setCreateModal({ show: false });
+      await addAccount(sectionId, newAccount);
+      setCreateModal({ show: false });
+    } catch (error) {
+      console.error('Error creating account:', error);
+      alert('Ошибка при создании счета');
+    }
   };
 
   const handleDragStart = (e: React.DragEvent, account: AccountItem) => {
@@ -177,26 +196,18 @@ export default function AccountingPage() {
     setTransactionModal({ show: false });
   };
 
-  const handleClearAllHistory = () => {
-    sections.forEach(section => {
-      section.accounts.forEach(account => {
-        clearAccountHistory(account.id);
-      });
-    });
-  };
-
-  const getColorClass = (color: string) => {
-    switch (color) {
-      case 'blue':
-        return 'bg-cyan-500';
-      case 'yellow':
-        return 'bg-yellow-400';
-      case 'green':
-        return 'bg-emerald-500';
-      case 'purple':
-        return 'bg-purple-500';
-      default:
-        return 'bg-gray-500';
+  const handleClearAllHistory = async () => {
+    try {
+      await Promise.all(
+        sections.flatMap(section =>
+          section.accounts.map(account =>
+            clearAccountHistory(account.id)
+          )
+        )
+      );
+    } catch (error) {
+      console.error('Error clearing all history:', error);
+      alert('Ошибка при очистке истории');
     }
   };
 
@@ -251,18 +262,8 @@ export default function AccountingPage() {
           x={contextMenu.x}
           y={contextMenu.y}
           onEdit={handleEditAccount}
-          onDelete={() => {
-            if (contextMenu.accountId && contextMenu.sectionId) {
-              deleteAccount(contextMenu.accountId, contextMenu.sectionId);
-            }
-            setContextMenu(prev => ({ ...prev, show: false }));
-          }}
-          onClearHistory={() => {
-            if (contextMenu.accountId) {
-              clearAccountHistory(contextMenu.accountId);
-            }
-            setContextMenu(prev => ({ ...prev, show: false }));
-          }}
+          onDelete={handleDeleteAccount}
+          onClearHistory={handleClearHistory}
           onClose={() => setContextMenu(prev => ({ ...prev, show: false }))}
         />
       )}
