@@ -16,7 +16,7 @@
     },
     {
       "collectionGroup": "transactions",
-      "queryScope": "COLLECTION",
+      "queryScope": "COLLECTION", 
       "fields": [
         {
           "fieldPath": "fromAccountId",
