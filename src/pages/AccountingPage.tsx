@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SEO from '../components/SEO';
 import AccountingSidebar from '../components/AccountingSidebar';
 import AccountContextMenu from '../components/AccountContextMenu';
@@ -10,6 +10,8 @@ import AccountSection from '../components/AccountSection';
 import AccountSummary from '../components/AccountSummary';
 import { useAccounts } from '../hooks/useAccounts';
 import { AccountItem } from '../types/accounting';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../config/firebase';
 
 const summary = {
   balance: "135.2M ₸",
@@ -26,7 +28,8 @@ export default function AccountingPage() {
     deleteAccount,
     addAccount,
     updateAccountAmount,
-    clearAccountHistory
+    clearAccountHistory,
+    isLoading
   } = useAccounts();
 
   const [contextMenu, setContextMenu] = useState<{
@@ -106,7 +109,7 @@ export default function AccountingPage() {
     });
   };
 
-  const handleSaveNewAccount = (name: string, iconType: string, color: 'blue' | 'yellow' | 'green' | 'purple', sectionId: string) => {
+  const handleSaveNewAccount = async (name: string, iconType: string, color: 'blue' | 'yellow' | 'green' | 'purple', sectionId: string) => {
     const newId = Math.max(...sections.flatMap(s => s.accounts.map(a => a.id))) + 1;
     
     const newAccount: AccountItem = {
@@ -117,7 +120,7 @@ export default function AccountingPage() {
       color
     };
 
-    addAccount(sectionId, newAccount);
+    await addAccount(sectionId, newAccount);
     setCreateModal({ show: false });
   };
 
@@ -150,38 +153,34 @@ export default function AccountingPage() {
     setDropTarget(null);
   };
 
-  const handleSaveTransaction = (amount: number, description: string, date: string) => {
+  const handleSaveTransaction = async (amount: number, description: string, date: string) => {
     if (transactionModal.fromAccount && transactionModal.toAccount) {
-      const transaction = {
-        id: Date.now(),
-        fromAccountId: transactionModal.fromAccount.id,
-        fromAccountName: transactionModal.fromAccount.name,
-        toAccountId: transactionModal.toAccount.id,
-        toAccountName: transactionModal.toAccount.name,
-        amount,
-        description,
-        date
-      };
+      try {
+        // Update account balances
+        await updateAccountAmount(transactionModal.fromAccount.id, -amount);
+        await updateAccountAmount(transactionModal.toAccount.id, amount);
 
-      // Обновляем баланс счетов
-      updateAccountAmount(transactionModal.fromAccount.id, -amount);
-      updateAccountAmount(transactionModal.toAccount.id, amount);
-
-      // Сохраняем транзакцию в историю обоих счетов
-      const fromStorageKey = `transactions_${transactionModal.fromAccount.id}`;
-      const toStorageKey = `transactions_${transactionModal.toAccount.id}`;
-
-      const fromTransactions = JSON.parse(localStorage.getItem(fromStorageKey) || '[]');
-      const toTransactions = JSON.parse(localStorage.getItem(toStorageKey) || '[]');
-
-      localStorage.setItem(fromStorageKey, JSON.stringify([...fromTransactions, transaction]));
-      localStorage.setItem(toStorageKey, JSON.stringify([...toTransactions, transaction]));
+        // Save transaction to Firestore
+        const transactionsRef = collection(db, 'transactions');
+        await addDoc(transactionsRef, {
+          fromAccountId: transactionModal.fromAccount.id.toString(),
+          fromAccountName: transactionModal.fromAccount.name,
+          toAccountId: transactionModal.toAccount.id.toString(),
+          toAccountName: transactionModal.toAccount.name,
+          amount,
+          description,
+          date,
+          createdAt: serverTimestamp()
+        });
+      } catch (error) {
+        console.error('Error saving transaction:', error);
+        alert('Ошибка при сохранении транзакции');
+      }
     }
     setTransactionModal({ show: false });
   };
 
   const handleClearAllHistory = () => {
-    // Очищаем все транзакции
     sections.forEach(section => {
       section.accounts.forEach(account => {
         clearAccountHistory(account.id);
@@ -203,6 +202,14 @@ export default function AccountingPage() {
         return 'bg-gray-500';
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl text-gray-600">Загрузка...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
