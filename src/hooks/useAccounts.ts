@@ -2,16 +2,10 @@ import { useState, useEffect } from 'react';
 import { AccountSection, AccountItem } from '../types/accounting';
 import { initialSections } from '../data/initialAccounts';
 
-const STORAGE_KEY = 'accountData';
+const API_URL = 'http://localhost:3001/api';
 
 export function useAccounts() {
-  // Загружаем данные из localStorage при инициализации
-  const loadInitialData = () => {
-    const savedData = localStorage.getItem(STORAGE_KEY);
-    return savedData ? JSON.parse(savedData) : initialSections;
-  };
-
-  const [sections, setSections] = useState<AccountSection[]>(loadInitialData);
+  const [sections, setSections] = useState<AccountSection[]>(initialSections);
   const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({
     clients: true,
     personal: true,
@@ -19,10 +13,27 @@ export function useAccounts() {
     warehouse: true
   });
 
-  // Сохраняем данные в localStorage при каждом изменении
+  // Загружаем данные с сервера при инициализации
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sections));
-  }, [sections]);
+    fetchAccounts();
+  }, []);
+
+  const fetchAccounts = async () => {
+    try {
+      const response = await fetch(`${API_URL}/accounts`);
+      const accounts = await response.json();
+      
+      // Группируем счета по секциям
+      const updatedSections = sections.map(section => ({
+        ...section,
+        accounts: accounts.filter((account: AccountItem) => account.section_id === section.id)
+      }));
+      
+      setSections(updatedSections);
+    } catch (error) {
+      console.error('Failed to fetch accounts:', error);
+    }
+  };
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections(prev => ({
@@ -31,81 +42,97 @@ export function useAccounts() {
     }));
   };
 
-  const updateAccount = (accountId: number, updates: Partial<AccountItem>) => {
-    setSections(prevSections =>
-      prevSections.map(section => ({
-        ...section,
-        accounts: section.accounts.map(account =>
-          account.id === accountId
-            ? { ...account, ...updates }
-            : account
+  const updateAccount = async (accountId: number, updates: Partial<AccountItem>) => {
+    try {
+      await fetch(`${API_URL}/accounts/${accountId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+      
+      setSections(prevSections =>
+        prevSections.map(section => ({
+          ...section,
+          accounts: section.accounts.map(account =>
+            account.id === accountId
+              ? { ...account, ...updates }
+              : account
+          )
+        }))
+      );
+    } catch (error) {
+      console.error('Failed to update account:', error);
+    }
+  };
+
+  const deleteAccount = async (accountId: number, sectionId: string) => {
+    try {
+      await fetch(`${API_URL}/accounts/${accountId}`, {
+        method: 'DELETE'
+      });
+      
+      setSections(prevSections =>
+        prevSections.map(section => {
+          if (section.id === sectionId) {
+            return {
+              ...section,
+              accounts: section.accounts.filter(account => account.id !== accountId)
+            };
+          }
+          return section;
+        })
+      );
+    } catch (error) {
+      console.error('Failed to delete account:', error);
+    }
+  };
+
+  const addAccount = async (sectionId: string, newAccount: AccountItem) => {
+    try {
+      const response = await fetch(`${API_URL}/accounts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...newAccount, section_id: sectionId })
+      });
+      const { id } = await response.json();
+      
+      setSections(prevSections =>
+        prevSections.map(section =>
+          section.id === sectionId
+            ? { ...section, accounts: [...section.accounts, { ...newAccount, id }] }
+            : section
         )
-      }))
-    );
+      );
+    } catch (error) {
+      console.error('Failed to add account:', error);
+    }
   };
 
-  const deleteAccount = (accountId: number, sectionId: string) => {
-    setSections(prevSections =>
-      prevSections.map(section => {
-        if (section.id === sectionId) {
-          return {
-            ...section,
-            accounts: section.accounts.filter(account => account.id !== accountId)
-          };
-        }
-        return section;
-      })
-    );
+  const updateAccountAmount = async (accountId: number, amount: number) => {
+    try {
+      const sections = await fetchAccounts();
+      const account = sections.flatMap(s => s.accounts).find(a => a.id === accountId);
+      if (account) {
+        const currentAmount = parseFloat(account.amount.replace(/[^0-9.-]+/g, ''));
+        const newAmount = `${(currentAmount + amount).toLocaleString()} ₸`;
+        await updateAccount(accountId, { amount: newAmount });
+      }
+    } catch (error) {
+      console.error('Failed to update account amount:', error);
+    }
   };
 
-  const addAccount = (sectionId: string, newAccount: AccountItem) => {
-    setSections(prevSections =>
-      prevSections.map(section =>
-        section.id === sectionId
-          ? { ...section, accounts: [...section.accounts, newAccount] }
-          : section
-      )
-    );
-  };
-
-  const updateAccountAmount = (accountId: number, amount: number) => {
-    setSections(prevSections =>
-      prevSections.map(section => ({
-        ...section,
-        accounts: section.accounts.map(account => {
-          if (account.id === accountId) {
-            const currentAmount = parseFloat(account.amount.replace(/[^0-9.-]+/g, ''));
-            return {
-              ...account,
-              amount: `${(currentAmount + amount).toLocaleString()} ₸`
-            };
-          }
-          return account;
-        })
-      }))
-    );
-  };
-
-  const clearAccountHistory = (accountId: number) => {
-    // Очищаем историю транзакций и сбрасываем сумму
-    setSections(prevSections =>
-      prevSections.map(section => ({
-        ...section,
-        accounts: section.accounts.map(account => {
-          if (account.id === accountId) {
-            return {
-              ...account,
-              amount: "0 ₸"
-            };
-          }
-          return account;
-        })
-      }))
-    );
-
-    // Очищаем историю в localStorage
-    const storageKey = `transactions_${accountId}`;
-    localStorage.removeItem(storageKey);
+  const clearAccountHistory = async (accountId: number) => {
+    try {
+      await fetch(`${API_URL}/transactions/${accountId}`, {
+        method: 'DELETE'
+      });
+      
+      // Сбрасываем сумму счета на 0
+      await updateAccount(accountId, { amount: "0 ₸" });
+    } catch (error) {
+      console.error('Failed to clear account history:', error);
+    }
   };
 
   return {
