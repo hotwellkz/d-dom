@@ -4,7 +4,7 @@ import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDagc1XcgKNcLpKs7ISKHDq0zuUfN7b7eo",
-  authDomain: "hotwellkz-accounting.firebaseapp.com", 
+  authDomain: "hotwellkz-accounting.firebaseapp.com",
   projectId: "hotwellkz-accounting",
   storageBucket: "hotwellkz-accounting.appspot.com",
   messagingSenderId: "218067666070",
