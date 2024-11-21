@@ -15,6 +15,7 @@ import {
 import { db } from '../config/firebase';
 
 const accountsCollection = collection(db, 'accounts');
+const transactionsCollection = collection(db, 'transactions');
 
 export function useAccounts() {
   const [sections, setSections] = useState<AccountSection[]>(initialSections);
@@ -106,9 +107,18 @@ export function useAccounts() {
 
   const deleteAccount = async (accountId: string, sectionId: string) => {
     try {
+      // Delete account document
       const docRef = doc(accountsCollection, accountId);
       await deleteDoc(docRef);
 
+      // Delete related transactions
+      const q = query(transactionsCollection, 
+        where('fromAccountId', '==', accountId)
+      );
+      const snapshot = await getDocs(q);
+      await Promise.all(snapshot.docs.map(doc => deleteDoc(doc.ref)));
+
+      // Update local state
       setSections(prevSections =>
         prevSections.map(section => {
           if (section.id === sectionId) {
@@ -128,6 +138,7 @@ export function useAccounts() {
 
   const addAccount = async (sectionId: string, newAccount: Omit<AccountItem, 'id'>) => {
     try {
+      // Add new account to Firestore
       const docRef = await addDoc(accountsCollection, {
         ...newAccount,
         sectionId,
@@ -135,6 +146,7 @@ export function useAccounts() {
         createdAt: serverTimestamp()
       });
 
+      // Update local state
       setSections(prevSections =>
         prevSections.map(section =>
           section.id === sectionId
@@ -171,9 +183,12 @@ export function useAccounts() {
 
   const clearAccountHistory = async (accountId: string) => {
     try {
-      const q = query(collection(db, 'transactions'), where('fromAccountId', '==', accountId));
+      // Delete all transactions for this account
+      const q = query(transactionsCollection, where('fromAccountId', '==', accountId));
       const snapshot = await getDocs(q);
       await Promise.all(snapshot.docs.map(doc => deleteDoc(doc.ref)));
+
+      // Reset account amount
       await updateAccount(accountId, { amount: "0 ₸" });
     } catch (error) {
       console.error('Failed to clear account history:', error);
