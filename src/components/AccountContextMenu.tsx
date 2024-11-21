@@ -5,8 +5,8 @@ interface AccountContextMenuProps {
   x: number;
   y: number;
   onEdit: () => void;
-  onDelete: () => void;
-  onClearHistory: () => void;
+  onDelete: () => Promise<void>;
+  onClearHistory: () => Promise<void>;
   onClose: () => void;
 }
 
@@ -18,6 +18,9 @@ export default function AccountContextMenu({
   onClearHistory,
   onClose 
 }: AccountContextMenuProps) {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
+
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -29,6 +32,32 @@ export default function AccountContextMenu({
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [onClose]);
+
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true);
+      await onDelete();
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      alert('Ошибка при удалении счета');
+    } finally {
+      setIsDeleting(false);
+      onClose();
+    }
+  };
+
+  const handleClearHistory = async () => {
+    try {
+      setIsClearing(true);
+      await onClearHistory();
+    } catch (error) {
+      console.error('Error clearing history:', error);
+      alert('Ошибка при очистке истории');
+    } finally {
+      setIsClearing(false);
+      onClose();
+    }
+  };
 
   return (
     <div 
@@ -47,18 +76,20 @@ export default function AccountContextMenu({
         Редактировать
       </button>
       <button
-        onClick={onClearHistory}
-        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+        onClick={handleClearHistory}
+        disabled={isClearing}
+        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center disabled:opacity-50"
       >
         <RotateCcw className="h-4 w-4 mr-2" />
-        Очистить историю
+        {isClearing ? 'Очистка...' : 'Очистить историю'}
       </button>
       <button
-        onClick={onDelete}
-        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100 flex items-center"
+        onClick={handleDelete}
+        disabled={isDeleting}
+        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100 flex items-center disabled:opacity-50"
       >
         <Trash2 className="h-4 w-4 mr-2" />
-        Удалить
+        {isDeleting ? 'Удаление...' : 'Удалить'}
       </button>
     </div>
   );
