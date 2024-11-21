@@ -27,8 +27,8 @@ export default function AccountSection({
   onCreateClick,
   onDragStart,
   onDragOver,
-  onDrop,
   onDragEnd,
+  onDrop,
   dropTarget,
   getColorClass
 }: AccountSectionProps) {
@@ -50,18 +50,27 @@ export default function AccountSection({
         <div className="p-6">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {section.accounts.map((account) => (
-              <div key={account.id} className="flex flex-col items-center">
+              <div 
+                key={account.id} 
+                className="flex flex-col items-center"
+                draggable
+                onDragStart={(e) => onDragStart(e, account)}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  onDragOver(e, account);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  onDrop(e, account);
+                }}
+                onDragEnd={onDragEnd}
+              >
                 <div 
-                  className={`${getColorClass(account.color)} rounded-full p-6 mb-2 shadow-lg cursor-pointer ${
-                    dropTarget?.id === account.id ? 'ring-4 ring-primary-500' : ''
+                  className={`${getColorClass(account.color)} rounded-full p-6 mb-2 shadow-lg cursor-pointer transition-all duration-200 ${
+                    dropTarget?.id === account.id ? 'ring-4 ring-primary-500 ring-opacity-50 scale-110' : ''
                   }`}
                   onClick={() => onAccountClick(account)}
                   onContextMenu={(e) => onContextMenu(e, account.id, section.id)}
-                  draggable
-                  onDragStart={(e) => onDragStart(e, account)}
-                  onDragOver={(e) => onDragOver(e, account)}
-                  onDrop={(e) => onDrop(e, account)}
-                  onDragEnd={onDragEnd}
                 >
                   <AccountIcon type={account.iconType} />
                 </div>
