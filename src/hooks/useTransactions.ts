@@ -1,10 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Transaction } from '../types/accounting';
 import { 
-  getAccountTransactions, 
-  createTransaction as dbCreateTransaction,
-  clearAccountTransactions 
-} from '../db/firebase';
+  collection,
+  addDoc,
+  query,
+  where,
+  getDocs,
+  serverTimestamp,
+  orderBy
+} from 'firebase/firestore';
+import { db } from '../config/firebase';
+
+const transactionsCollection = collection(db, 'transactions');
 
 export function useTransactions(accountId: number) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -19,8 +26,17 @@ export function useTransactions(accountId: number) {
   const fetchTransactions = async () => {
     try {
       setIsLoading(true);
-      const data = await getAccountTransactions(accountId.toString());
-      setTransactions(data);
+      const q = query(
+        transactionsCollection,
+        where('fromAccountId', '==', accountId.toString()),
+        orderBy('createdAt', 'desc')
+      );
+      const snapshot = await getDocs(q);
+      const transactionData = snapshot.docs.map(doc => ({
+        id: parseInt(doc.id),
+        ...doc.data()
+      })) as Transaction[];
+      setTransactions(transactionData);
     } catch (error) {
       console.error('Failed to fetch transactions:', error);
     } finally {
@@ -30,9 +46,18 @@ export function useTransactions(accountId: number) {
 
   const addTransaction = async (transaction: Omit<Transaction, 'id'>) => {
     try {
-      const id = await dbCreateTransaction(transaction);
-      setTransactions(prev => [...prev, { ...transaction, id }]);
-      await fetchTransactions(); // Обновляем список после добавления
+      const docRef = await addDoc(transactionsCollection, {
+        ...transaction,
+        createdAt: serverTimestamp()
+      });
+      
+      const newTransaction = {
+        id: parseInt(docRef.id),
+        ...transaction
+      };
+      
+      setTransactions(prev => [newTransaction, ...prev]);
+      return docRef.id;
     } catch (error) {
       console.error('Failed to add transaction:', error);
       throw error;
@@ -41,7 +66,12 @@ export function useTransactions(accountId: number) {
 
   const clearTransactions = async () => {
     try {
-      await clearAccountTransactions(accountId.toString());
+      const q = query(
+        transactionsCollection,
+        where('fromAccountId', '==', accountId.toString())
+      );
+      const snapshot = await getDocs(q);
+      await Promise.all(snapshot.docs.map(doc => doc.delete()));
       setTransactions([]);
     } catch (error) {
       console.error('Failed to clear transactions:', error);
