@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react';
 import { AccountSection, AccountItem } from '../types/accounting';
 import { initialSections } from '../data/initialAccounts';
-
-const API_URL = 'http://localhost:3001/api';
+import { 
+  getAllAccounts, 
+  createAccount as dbCreateAccount,
+  updateAccount as dbUpdateAccount,
+  deleteAccount as dbDeleteAccount,
+  clearAccountTransactions
+} from '../db/firebase';
 
 export function useAccounts() {
   const [sections, setSections] = useState<AccountSection[]>(initialSections);
@@ -14,40 +19,37 @@ export function useAccounts() {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  // Загружаем данные с сервера при инициализации
   useEffect(() => {
-    fetchAccounts();
+    loadAccounts();
   }, []);
 
-  const fetchAccounts = async () => {
+  const loadAccounts = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`${API_URL}/accounts`);
-      const accounts = await response.json();
+      const accounts = await getAllAccounts();
       
       if (accounts.length === 0) {
-        // Если база данных пуста, инициализируем её данными из initialSections
+        // Инициализируем базу данных начальными значениями
         await Promise.all(
           initialSections.flatMap(section =>
             section.accounts.map(account =>
-              createAccount(section.id, account)
+              dbCreateAccount({ ...account, sectionId: section.id })
             )
           )
         );
-        return;
+        setSections(initialSections);
+      } else {
+        // Группируем счета по секциям
+        const updatedSections = sections.map(section => ({
+          ...section,
+          accounts: accounts
+            .filter(account => account.sectionId === section.id)
+            .map(({ sectionId, ...account }) => account as AccountItem)
+        }));
+        setSections(updatedSections);
       }
-      
-      // Группируем счета по секциям
-      const updatedSections = sections.map(section => ({
-        ...section,
-        accounts: accounts.filter((account: AccountItem & { section_id: string }) => 
-          account.section_id === section.id
-        )
-      }));
-      
-      setSections(updatedSections);
     } catch (error) {
-      console.error('Failed to fetch accounts:', error);
+      console.error('Failed to load accounts:', error);
     } finally {
       setIsLoading(false);
     }
@@ -62,12 +64,7 @@ export function useAccounts() {
 
   const updateAccount = async (accountId: number, updates: Partial<AccountItem>) => {
     try {
-      await fetch(`${API_URL}/accounts/${accountId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates)
-      });
-      
+      await dbUpdateAccount(accountId.toString(), updates);
       setSections(prevSections =>
         prevSections.map(section => ({
           ...section,
@@ -86,11 +83,7 @@ export function useAccounts() {
 
   const deleteAccount = async (accountId: number, sectionId: string) => {
     try {
-      await fetch(`${API_URL}/accounts/${accountId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
+      await dbDeleteAccount(accountId.toString());
       setSections(prevSections =>
         prevSections.map(section => {
           if (section.id === sectionId) {
@@ -108,34 +101,16 @@ export function useAccounts() {
     }
   };
 
-  const createAccount = async (sectionId: string, account: Omit<AccountItem, 'id'>) => {
-    try {
-      const response = await fetch(`${API_URL}/accounts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...account, section_id: sectionId })
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to create account');
-      }
-      
-      const { id } = await response.json();
-      return id;
-    } catch (error) {
-      console.error('Failed to create account:', error);
-      throw error;
-    }
-  };
-
   const addAccount = async (sectionId: string, newAccount: Omit<AccountItem, 'id'>) => {
     try {
-      const id = await createAccount(sectionId, newAccount);
-      
+      const id = await dbCreateAccount({ ...newAccount, sectionId });
       setSections(prevSections =>
         prevSections.map(section =>
           section.id === sectionId
-            ? { ...section, accounts: [...section.accounts, { ...newAccount, id }] }
+            ? { 
+                ...section, 
+                accounts: [...section.accounts, { ...newAccount, id: parseInt(id) }] 
+              }
             : section
         )
       );
@@ -164,12 +139,7 @@ export function useAccounts() {
 
   const clearAccountHistory = async (accountId: number) => {
     try {
-      await fetch(`${API_URL}/transactions/${accountId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
-      // Сбрасываем сумму счета на 0
+      await clearAccountTransactions(accountId.toString());
       await updateAccount(accountId, { amount: "0 ₸" });
     } catch (error) {
       console.error('Failed to clear account history:', error);
