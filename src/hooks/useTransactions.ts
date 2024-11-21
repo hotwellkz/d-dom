@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Transaction } from '../types/accounting';
-
-const API_URL = 'http://localhost:3001/api';
+import { 
+  getAccountTransactions, 
+  createTransaction as dbCreateTransaction,
+  clearAccountTransactions 
+} from '../db/firebase';
 
 export function useTransactions(accountId: number) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -16,13 +19,7 @@ export function useTransactions(accountId: number) {
   const fetchTransactions = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`${API_URL}/transactions/${accountId}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch transactions');
-      }
-      
-      const data = await response.json();
+      const data = await getAccountTransactions(accountId.toString());
       setTransactions(data);
     } catch (error) {
       console.error('Failed to fetch transactions:', error);
@@ -33,21 +30,9 @@ export function useTransactions(accountId: number) {
 
   const addTransaction = async (transaction: Omit<Transaction, 'id'>) => {
     try {
-      const response = await fetch(`${API_URL}/transactions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(transaction)
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to create transaction');
-      }
-      
-      const { id } = await response.json();
+      const id = await dbCreateTransaction(transaction);
       setTransactions(prev => [...prev, { ...transaction, id }]);
-      
-      // Обновляем список транзакций после добавления новой
-      await fetchTransactions();
+      await fetchTransactions(); // Обновляем список после добавления
     } catch (error) {
       console.error('Failed to add transaction:', error);
       throw error;
@@ -56,15 +41,7 @@ export function useTransactions(accountId: number) {
 
   const clearTransactions = async () => {
     try {
-      const response = await fetch(`${API_URL}/transactions/${accountId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to clear transactions');
-      }
-      
+      await clearAccountTransactions(accountId.toString());
       setTransactions([]);
     } catch (error) {
       console.error('Failed to clear transactions:', error);
