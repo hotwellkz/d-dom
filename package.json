@@ -8,7 +8,10 @@
     "build": "tsc && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "firebase:emulators": "firebase emulators:start"
+    "firebase:login": "npx firebase login",
+    "firebase:init": "npx firebase init",
+    "firebase:deploy": "npm run build && npx firebase deploy",
+    "firebase:emulators": "npx firebase emulators:start"
   },
   "dependencies": {
     "@types/react-transition-group": "^4.4.10",
