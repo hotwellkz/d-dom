@@ -20,6 +20,6 @@ export default defineConfig({
     host: true
   },
   define: {
-    'process.env': process.env
+    'process.env': {}
   }
 });
