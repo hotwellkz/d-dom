@@ -36,7 +36,7 @@ export default function AccountingPage() {
     show: boolean;
     x: number;
     y: number;
-    accountId?: number;
+    accountId?: string;
     sectionId?: string;
   }>({
     show: false,
@@ -46,7 +46,7 @@ export default function AccountingPage() {
 
   const [editModal, setEditModal] = useState<{
     show: boolean;
-    accountId?: number;
+    accountId?: string;
     currentName?: string;
   }>({
     show: false
@@ -70,7 +70,7 @@ export default function AccountingPage() {
     show: false
   });
 
-  const handleContextMenu = (e: React.MouseEvent, accountId: number, sectionId: string) => {
+  const handleContextMenu = (e: React.MouseEvent, accountId: string, sectionId: string) => {
     e.preventDefault();
     setContextMenu({
       show: true,
@@ -110,10 +110,7 @@ export default function AccountingPage() {
   };
 
   const handleSaveNewAccount = async (name: string, iconType: string, color: 'blue' | 'yellow' | 'green' | 'purple', sectionId: string) => {
-    const newId = Math.max(...sections.flatMap(s => s.accounts.map(a => a.id))) + 1;
-    
-    const newAccount: AccountItem = {
-      id: newId,
+    const newAccount: Omit<AccountItem, 'id'> = {
       name,
       amount: "0 ₸",
       iconType,
@@ -163,9 +160,9 @@ export default function AccountingPage() {
         // Save transaction to Firestore
         const transactionsRef = collection(db, 'transactions');
         await addDoc(transactionsRef, {
-          fromAccountId: transactionModal.fromAccount.id.toString(),
+          fromAccountId: transactionModal.fromAccount.id,
           fromAccountName: transactionModal.fromAccount.name,
-          toAccountId: transactionModal.toAccount.id.toString(),
+          toAccountId: transactionModal.toAccount.id,
           toAccountName: transactionModal.toAccount.name,
           amount,
           description,
