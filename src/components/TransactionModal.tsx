@@ -53,9 +53,9 @@ export default function TransactionModal({
       // Save transaction to Firestore
       const transactionsRef = collection(db, 'transactions');
       await addDoc(transactionsRef, {
-        fromAccountId: fromAccount.id.toString(),
+        fromAccountId: fromAccount.id,
         fromAccountName: fromAccount.name,
-        toAccountId: toAccount.id.toString(),
+        toAccountId: toAccount.id,
         toAccountName: toAccount.name,
         amount: numAmount,
         description: description.trim(),
