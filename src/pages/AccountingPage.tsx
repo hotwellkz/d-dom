@@ -10,7 +10,6 @@ import AccountSection from '../components/AccountSection';
 import AccountSummary from '../components/AccountSummary';
 import { useAccounts } from '../hooks/useAccounts';
 import { AccountItem } from '../types/accounting';
-import { IconType } from '../types/icons';
 
 const summary = {
   balance: "135.2M ₸",
@@ -107,7 +106,7 @@ export default function AccountingPage() {
     });
   };
 
-  const handleSaveNewAccount = (name: string, iconType: IconType, color: 'blue' | 'yellow' | 'green' | 'purple', sectionId: string) => {
+  const handleSaveNewAccount = (name: string, iconType: string, color: 'blue' | 'yellow' | 'green' | 'purple', sectionId: string) => {
     const newId = Math.max(...sections.flatMap(s => s.accounts.map(a => a.id))) + 1;
     
     const newAccount: AccountItem = {
@@ -124,7 +123,7 @@ export default function AccountingPage() {
 
   const handleDragStart = (e: React.DragEvent, account: AccountItem) => {
     setDraggedAccount(account);
-    e.dataTransfer.setData('text/plain', '');
+    e.dataTransfer.setData('text/plain', ''); // Required for Firefox
   };
 
   const handleDragOver = (e: React.DragEvent, account: AccountItem) => {
@@ -153,13 +152,36 @@ export default function AccountingPage() {
 
   const handleSaveTransaction = (amount: number, description: string, date: string) => {
     if (transactionModal.fromAccount && transactionModal.toAccount) {
+      const transaction = {
+        id: Date.now(),
+        fromAccountId: transactionModal.fromAccount.id,
+        fromAccountName: transactionModal.fromAccount.name,
+        toAccountId: transactionModal.toAccount.id,
+        toAccountName: transactionModal.toAccount.name,
+        amount,
+        description,
+        date
+      };
+
+      // Обновляем баланс счетов
       updateAccountAmount(transactionModal.fromAccount.id, -amount);
       updateAccountAmount(transactionModal.toAccount.id, amount);
+
+      // Сохраняем транзакцию в историю обоих счетов
+      const fromStorageKey = `transactions_${transactionModal.fromAccount.id}`;
+      const toStorageKey = `transactions_${transactionModal.toAccount.id}`;
+
+      const fromTransactions = JSON.parse(localStorage.getItem(fromStorageKey) || '[]');
+      const toTransactions = JSON.parse(localStorage.getItem(toStorageKey) || '[]');
+
+      localStorage.setItem(fromStorageKey, JSON.stringify([...fromTransactions, transaction]));
+      localStorage.setItem(toStorageKey, JSON.stringify([...toTransactions, transaction]));
     }
     setTransactionModal({ show: false });
   };
 
   const handleClearAllHistory = () => {
+    // Очищаем все транзакции
     sections.forEach(section => {
       section.accounts.forEach(account => {
         clearAccountHistory(account.id);
@@ -185,7 +207,7 @@ export default function AccountingPage() {
   return (
     <div className="min-h-screen">
       <AccountingSidebar />
-      <div className="transition-all duration-300">
+      <div className="pl-64">
         <div className="pt-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <SEO 
