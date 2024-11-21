@@ -10,7 +10,8 @@ import {
   deleteDoc,
   query,
   where,
-  serverTimestamp
+  serverTimestamp,
+  onSnapshot
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
@@ -27,8 +28,25 @@ export function useAccounts() {
   });
   const [isLoading, setIsLoading] = useState(true);
 
+  // Подписываемся на изменения в реальном времени
   useEffect(() => {
-    loadAccounts();
+    const unsubscribe = onSnapshot(accountsCollection, (snapshot) => {
+      const accounts = snapshot.docs.map(doc => ({
+        id: parseInt(doc.id),
+        ...doc.data()
+      }));
+
+      const updatedSections = sections.map(section => ({
+        ...section,
+        accounts: accounts
+          .filter(account => account.sectionId === section.id)
+          .map(({ sectionId, ...account }) => account as AccountItem)
+      }));
+
+      setSections(updatedSections);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const loadAccounts = async () => {
@@ -85,16 +103,8 @@ export function useAccounts() {
         ...updates,
         updatedAt: serverTimestamp()
       });
-      setSections(prevSections =>
-        prevSections.map(section => ({
-          ...section,
-          accounts: section.accounts.map(account =>
-            account.id === accountId
-              ? { ...account, ...updates }
-              : account
-          )
-        }))
-      );
+      
+      // Обновление локального состояния произойдет автоматически через onSnapshot
     } catch (error) {
       console.error('Failed to update account:', error);
       throw error;
@@ -111,17 +121,7 @@ export function useAccounts() {
       const snapshot = await getDocs(q);
       await Promise.all(snapshot.docs.map(doc => deleteDoc(doc.ref)));
       
-      setSections(prevSections =>
-        prevSections.map(section => {
-          if (section.id === sectionId) {
-            return {
-              ...section,
-              accounts: section.accounts.filter(account => account.id !== accountId)
-            };
-          }
-          return section;
-        })
-      );
+      // Обновление локального состояния произойдет автоматически через onSnapshot
     } catch (error) {
       console.error('Failed to delete account:', error);
       throw error;
@@ -133,19 +133,11 @@ export function useAccounts() {
       const docRef = await addDoc(accountsCollection, {
         ...newAccount,
         sectionId,
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
+        amount: "0 ₸"
       });
       
-      setSections(prevSections =>
-        prevSections.map(section =>
-          section.id === sectionId
-            ? { 
-                ...section, 
-                accounts: [...section.accounts, { ...newAccount, id: parseInt(docRef.id) }] 
-              }
-            : section
-        )
-      );
+      // Обновление локального состояния произойдет автоматически через onSnapshot
     } catch (error) {
       console.error('Failed to add account:', error);
       throw error;
