@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, User, Car, Building2, Calculator, Home, Hammer } from 'lucide-react';
+import { X } from 'lucide-react';
 import { IconType } from '../types/icons';
+import AccountIcon from './AccountIcon';
 
 interface CreateAccountModalProps {
   isOpen: boolean;
@@ -9,21 +10,21 @@ interface CreateAccountModalProps {
   sectionId: string;
 }
 
-const icons: { id: IconType; icon: React.ReactNode; label: string }[] = [
-  { id: 'user', icon: <User className="h-6 w-6 text-white" />, label: 'Пользователь' },
-  { id: 'car', icon: <Car className="h-6 w-6 text-white" />, label: 'Транспорт' },
-  { id: 'building', icon: <Building2 className="h-6 w-6 text-white" />, label: 'Здание' },
-  { id: 'calculator', icon: <Calculator className="h-6 w-6 text-white" />, label: 'Калькулятор' },
-  { id: 'home', icon: <Home className="h-6 w-6 text-white" />, label: 'Дом' },
-  { id: 'hammer', icon: <Hammer className="h-6 w-6 text-white" />, label: 'Инструменты' }
-] as const;
+const icons: { type: IconType; label: string }[] = [
+  { type: 'user', label: 'Пользователь' },
+  { type: 'car', label: 'Транспорт' },
+  { type: 'building', label: 'Здание' },
+  { type: 'calculator', label: 'Калькулятор' },
+  { type: 'home', label: 'Дом' },
+  { type: 'hammer', label: 'Инструменты' }
+];
 
 const colors = [
   { id: 'blue', label: 'Синий', class: 'bg-cyan-500' },
   { id: 'yellow', label: 'Желтый', class: 'bg-yellow-400' },
   { id: 'green', label: 'Зеленый', class: 'bg-emerald-500' },
   { id: 'purple', label: 'Фиолетовый', class: 'bg-purple-500' }
-];
+] as const;
 
 export default function CreateAccountModal({ isOpen, onClose, onSave, sectionId }: CreateAccountModalProps) {
   const [name, setName] = useState('');
@@ -77,20 +78,21 @@ export default function CreateAccountModal({ isOpen, onClose, onSave, sectionId 
               <div className="grid grid-cols-3 gap-3">
                 {icons.map((icon) => (
                   <button
-                    key={icon.id}
+                    key={icon.type}
                     type="button"
-                    onClick={() => setSelectedIcon(icon.id)}
-                    className={`p-3 rounded-lg flex items-center justify-center ${
-                      selectedIcon === icon.id 
+                    onClick={() => setSelectedIcon(icon.type)}
+                    className={`p-3 rounded-lg flex flex-col items-center gap-2 ${
+                      selectedIcon === icon.type 
                         ? 'bg-primary-100 ring-2 ring-primary-500' 
                         : 'bg-gray-100 hover:bg-gray-200'
                     }`}
                   >
                     <div className={`p-2 rounded-full ${
-                      selectedIcon === icon.id ? 'bg-primary-600' : 'bg-gray-500'
+                      selectedIcon === icon.type ? 'bg-primary-600' : 'bg-gray-500'
                     }`}>
-                      {icon.icon}
+                      <AccountIcon type={icon.type} className="h-6 w-6 text-white" />
                     </div>
+                    <span className="text-xs">{icon.label}</span>
                   </button>
                 ))}
               </div>
@@ -105,7 +107,7 @@ export default function CreateAccountModal({ isOpen, onClose, onSave, sectionId 
                   <button
                     key={color.id}
                     type="button"
-                    onClick={() => setSelectedColor(color.id as 'blue' | 'yellow' | 'green' | 'purple')}
+                    onClick={() => setSelectedColor(color.id)}
                     className={`p-3 rounded-lg flex items-center justify-center ${
                       selectedColor === color.id 
                         ? 'ring-2 ring-primary-500' 
